@@ -80,8 +80,12 @@ export default function ProductsPage() {
     } catch (error) {
       console.error('Error fetching products:', error)
       // Fallback to static products if API fails
-      setAllProducts(staticProducts)
-      setDisplayProducts(staticProducts)
+      const fallback = staticProducts.map((product: any) => ({
+        ...product,
+        id: `static-${product.id}`,
+      })) as Product[]
+      setAllProducts(fallback)
+      setDisplayProducts(fallback)
     } finally {
       setLoading(false)
     }
