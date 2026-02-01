@@ -1,10 +1,12 @@
+// Frontend: src/components/products/ProductCard.tsx
+
 'use client'
 import Link from 'next/link'
 import { ShoppingCart, MessageCircle } from 'lucide-react'
 import { useQuote } from '@/context/QuoteContext'
 
 interface Product {
-  id: number
+  id: number | string
   name: string
   price: number | string
   image?: string
