@@ -33,12 +33,23 @@ export function QuoteProvider({ children }) {
   }
 
   const removeFromQuote = (productId) => {
-    setQuoteItems(quoteItems.filter(item => item.id !== productId))
+    const item = quoteItems.find(item => item.id === productId)
+    if (item && item.quantity > 1) {
+      // Decrease quantity by 1
+      setQuoteItems(quoteItems.map(item =>
+        item.id === productId
+          ? { ...item, quantity: item.quantity - 1 }
+          : item
+      ))
+    } else {
+      // Remove completely if quantity is 1
+      setQuoteItems(quoteItems.filter(item => item.id !== productId))
+    }
   }
 
   const updateQuantity = (productId, quantity) => {
     if (quantity < 1) {
-      removeFromQuote(productId)
+      setQuoteItems(quoteItems.filter(item => item.id !== productId))
       return
     }
     setQuoteItems(quoteItems.map(item =>
@@ -54,6 +65,11 @@ export function QuoteProvider({ children }) {
     return quoteItems.reduce((sum, item) => sum + item.quantity, 0)
   }
 
+  const getItemQuantity = (productId) => {
+    const item = quoteItems.find(item => item.id === productId)
+    return item ? item.quantity : 0
+  }
+
   return (
     <QuoteContext.Provider value={{
       quoteItems,
@@ -61,7 +77,8 @@ export function QuoteProvider({ children }) {
       removeFromQuote,
       updateQuantity,
       clearQuote,
-      getQuoteCount
+      getQuoteCount,
+      getItemQuantity
     }}>
       {children}
     </QuoteContext.Provider>

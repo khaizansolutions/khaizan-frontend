@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import { ShoppingCart, Menu, X, FileText } from 'lucide-react'
+import { ShoppingCart, Menu, X } from 'lucide-react'
 import { useQuote } from '@/context/QuoteContext'
 import SmartSearch from '@/components/common/SmartSearch'
 
@@ -32,8 +32,8 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center gap-4">
-            <Link href="/quote" className="relative hover:text-primary">
-              <FileText size={28} />
+            <Link href="/quote" className="relative hover:text-primary transition">
+              <ShoppingCart size={28} />
               {getQuoteCount() > 0 && (
                 <span className="absolute -top-2 -right-2 bg-secondary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
                   {getQuoteCount()}
