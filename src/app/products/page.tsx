@@ -1,17 +1,27 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import ProductCard from '@/components/products/ProductCard'
 import ProductFilters from '@/components/products/ProductFilters'
 import { ProductCardSkeleton } from '@/components/common/LoadingSkeleton'
 import { products as staticProducts } from '@/data/products'
 import { api } from '@/lib/api'
 
+// Get API URL - matches your lib/api.js pattern
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://khaizen-backend.onrender.com/api'
+
 export default function ProductsPage() {
+  const searchParams = useSearchParams()
+  const categoryParam = searchParams.get('category')
+  const subcategoryParam = searchParams.get('subcategory')
+
   const [allProducts, setAllProducts] = useState<any[]>([])
   const [displayProducts, setDisplayProducts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [sortBy, setSortBy] = useState('featured')
+  const [pageTitle, setPageTitle] = useState('All Products')
+  const [pageDescription, setPageDescription] = useState('Discover our complete range of office supplies')
 
   const categories = [
     'Office Supplies',
@@ -24,15 +34,47 @@ export default function ProductsPage() {
 
   useEffect(() => {
     fetchAllProducts()
-  }, [])
+  }, [categoryParam, subcategoryParam])
 
   const fetchAllProducts = async () => {
     try {
       setLoading(true)
 
-      // Fetch products from Django API
-      const apiData = await api.getProducts()
-      const apiProductList = apiData.results || apiData || []
+      let apiProductList = []
+
+      // Check if we have subcategory filter from URL
+      if (subcategoryParam) {
+        // Fetch products filtered by subcategory
+        const response = await fetch(`${API_URL}/listing/subcategory/${subcategoryParam}`)
+        const data = await response.json()
+        apiProductList = data.products || []
+
+        // Update page title
+        if (data.subcategory) {
+          setPageTitle(data.subcategory.name)
+          setPageDescription(data.subcategory.description || `Browse our ${data.subcategory.name} products`)
+        }
+      }
+      // Check if we have category filter from URL
+      else if (categoryParam) {
+        // Fetch products filtered by category
+        const response = await fetch(`${API_URL}/listing/category/${categoryParam}`)
+        const data = await response.json()
+        apiProductList = data.products || []
+
+        // Update page title
+        if (data.category) {
+          setPageTitle(data.category.name)
+          setPageDescription(data.category.description || `Browse our ${data.category.name} products`)
+        }
+      }
+      // No filters - fetch all products
+      else {
+        const apiData = await api.getProducts()
+        apiProductList = apiData.results || apiData || []
+        setPageTitle('All Products')
+        setPageDescription('Discover our complete range of office supplies')
+      }
 
       // Transform API products
       const transformedApiProducts = apiProductList.map((product: any) => ({
@@ -42,15 +84,16 @@ export default function ProductsPage() {
         category: product.category_name || product.category,
       }))
 
-      // Transform static products with unique IDs
-      const transformedStaticProducts = staticProducts.map((product: any) => ({
-        ...product,
-        id: `static-${product.id}`,
-        image: product.image || product.main_image,
-      }))
-
-      // Combine: API products first, then static products
-      const combined = [...transformedApiProducts, ...transformedStaticProducts]
+      // If no filters, also include static products
+      let combined = transformedApiProducts
+      if (!categoryParam && !subcategoryParam) {
+        const transformedStaticProducts = staticProducts.map((product: any) => ({
+          ...product,
+          id: `static-${product.id}`,
+          image: product.image || product.main_image,
+        }))
+        combined = [...transformedApiProducts, ...transformedStaticProducts]
+      }
 
       setAllProducts(combined)
       setDisplayProducts(combined)
@@ -79,7 +122,7 @@ export default function ProductsPage() {
   const handleApplyFilters = () => {
     let filtered = [...allProducts]
 
-    // Filter by category only (removed price filter)
+    // Filter by category
     if (selectedCategories.length > 0) {
       filtered = filtered.filter((product: any) => {
         const productCategory = product.category_name || product.category
@@ -107,7 +150,6 @@ export default function ProductsPage() {
         filtered.reverse()
         break
       default:
-        // Featured - keep original order
         break
     }
 
@@ -124,10 +166,20 @@ export default function ProductsPage() {
     <div className="container mx-auto px-4 py-6 md:py-8">
       {/* Page Header */}
       <div className="mb-6 md:mb-8">
-        <h1 className="text-2xl md:text-4xl font-bold mb-2">All Products</h1>
+        <h1 className="text-2xl md:text-4xl font-bold mb-2">{pageTitle}</h1>
         <p className="text-gray-600 text-sm md:text-base">
-          Discover our complete range of office supplies
+          {pageDescription}
         </p>
+        {(categoryParam || subcategoryParam) && (
+          <div className="mt-2">
+            <a
+              href="/products"
+              className="text-sm text-primary hover:underline"
+            >
+              ← View all products
+            </a>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col md:flex-row gap-6 md:gap-8">
@@ -171,17 +223,14 @@ export default function ProductsPage() {
           {/* Products Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {loading ? (
-              // Loading Skeletons
               Array.from({ length: 6 }).map((_, i) => (
                 <ProductCardSkeleton key={i} />
               ))
             ) : displayProducts.length > 0 ? (
-              // Product Cards
               displayProducts.map((product: any) => (
                 <ProductCard key={product.id} product={product} />
               ))
             ) : (
-              // Empty State
               <div className="col-span-2 lg:col-span-3 text-center py-16">
                 <div className="text-gray-400 mb-4">
                   <svg
@@ -202,7 +251,7 @@ export default function ProductsPage() {
                   No Products Found
                 </h3>
                 <p className="text-gray-500 mb-4">
-                  Try adjusting your filters
+                  Try adjusting your filters or view all products
                 </p>
                 <button
                   onClick={handleClearFilters}

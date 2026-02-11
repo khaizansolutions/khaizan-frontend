@@ -1,22 +1,54 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ShoppingCart, Menu, X } from 'lucide-react'
+import { ShoppingCart, Menu, X, ChevronDown } from 'lucide-react'
 import { useQuote } from '@/context/QuoteContext'
 import SmartSearch from '@/components/common/SmartSearch'
 
+interface Subcategory {
+  id: number
+  name: string
+  slug: string
+}
+
+interface NavCategory {
+  id: number
+  name: string
+  slug: string
+  navbar_order: number
+  subcategories: Subcategory[]
+}
+
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [categories, setCategories] = useState<NavCategory[]>([])
+  const [loading, setLoading] = useState(true)
+  const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
   const { getQuoteCount } = useQuote()
 
-  const categories = [
-    { name: 'Office Supplies', href: '/products?category=office-supplies' },
-    { name: 'Paper Products', href: '/products?category=paper' },
-    { name: 'Ink & Toner', href: '/products?category=ink-toner' },
-    { name: 'Office Machines', href: '/products?category=machines' },
-    { name: 'Technology', href: '/products?category=technology' },
-    { name: 'Furniture', href: '/products?category=furniture' },
-  ]
+  useEffect(() => {
+    fetchNavbarCategories()
+  }, [])
+
+  const fetchNavbarCategories = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/categories/?navbar=true', {
+        cache: 'no-store'
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch categories')
+      }
+
+      const data = await response.json()
+      setCategories(data.results || data)
+    } catch (error) {
+      console.error('Error fetching navbar categories:', error)
+      setCategories([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
@@ -40,7 +72,7 @@ export default function Navbar() {
                 </span>
               )}
             </Link>
-            <button 
+            <button
               className="md:hidden"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
@@ -51,15 +83,51 @@ export default function Navbar() {
 
         {/* Categories - Desktop */}
         <div className="hidden md:flex items-center justify-center gap-8 py-3 border-t">
-          {categories.map((category) => (
-            <Link
-              key={category.name}
-              href={category.href}
-              className="text-gray-700 hover:text-primary font-medium transition"
-            >
-              {category.name}
-            </Link>
-          ))}
+          {loading ? (
+            <>
+              {[1,2,3,4,5,6].map(i => (
+                <div key={i} className="h-6 w-24 bg-gray-200 rounded animate-pulse"></div>
+              ))}
+            </>
+          ) : categories.length > 0 ? (
+            categories.map((category) => (
+              <div
+                key={category.id}
+                className="relative"
+                onMouseEnter={() => setActiveDropdown(category.id)}
+                onMouseLeave={() => setActiveDropdown(null)}
+              >
+                <Link
+                  href={`/products?category=${category.slug}`}
+                  className="text-gray-700 hover:text-primary font-medium transition flex items-center gap-1"
+                >
+                  {category.name}
+                  {category.subcategories && category.subcategories.length > 0 && (
+                    <ChevronDown className="w-4 h-4" />
+                  )}
+                </Link>
+
+                {/* Dropdown for Subcategories */}
+                {category.subcategories &&
+                 category.subcategories.length > 0 &&
+                 activeDropdown === category.id && (
+                  <div className="absolute top-full left-0 mt-2 bg-white border rounded-lg shadow-lg py-2 min-w-[200px] z-50">
+                    {category.subcategories.map((subcategory) => (
+                      <Link
+                        key={subcategory.id}
+                        href={`/products?subcategory=${subcategory.slug}`}
+                        className="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-primary transition"
+                      >
+                        {subcategory.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500 text-sm">No categories available</p>
+          )}
         </div>
 
         {/* Mobile Menu */}
@@ -69,18 +137,45 @@ export default function Navbar() {
             <div className="mb-4">
               <SmartSearch onClose={() => setMobileMenuOpen(false)} />
             </div>
-            
+
             {/* Mobile Categories */}
-            {categories.map((category) => (
-              <Link
-                key={category.name}
-                href={category.href}
-                className="block py-2 text-gray-700 hover:text-primary hover:bg-gray-100 px-4"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {category.name}
-              </Link>
-            ))}
+            {loading ? (
+              <div className="space-y-2">
+                {[1,2,3,4,5,6].map(i => (
+                  <div key={i} className="h-10 bg-gray-200 rounded animate-pulse"></div>
+                ))}
+              </div>
+            ) : categories.length > 0 ? (
+              categories.map((category) => (
+                <div key={category.id}>
+                  <Link
+                    href={`/products?category=${category.slug}`}
+                    className="block py-2 text-gray-700 hover:text-primary hover:bg-gray-100 px-4 font-medium"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {category.name}
+                  </Link>
+
+                  {/* Subcategories under each category (mobile) */}
+                  {category.subcategories && category.subcategories.length > 0 && (
+                    <div className="pl-8 bg-gray-50">
+                      {category.subcategories.map((subcategory) => (
+                        <Link
+                          key={subcategory.id}
+                          href={`/products?subcategory=${subcategory.slug}`}
+                          className="block py-2 text-sm text-gray-600 hover:text-primary px-4"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          {subcategory.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500 text-sm px-4">No categories available</p>
+            )}
           </div>
         )}
       </div>
