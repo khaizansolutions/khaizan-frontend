@@ -1,4 +1,4 @@
-import type { NextConfig } from 'next'
+﻿import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   images: {
@@ -13,12 +13,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Optimize for build
+  output: 'standalone',
   productionBrowserSourceMaps: false,
-  experimental: {
-    workerThreads: false,
-    cpus: 1,
-  },
 }
 
 export default nextConfig
