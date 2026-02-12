@@ -1,5 +1,6 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import type { NextConfig } from 'next'
+
+const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
@@ -12,6 +13,12 @@ const nextConfig = {
       },
     ],
   },
+  // Optimize for build
+  productionBrowserSourceMaps: false,
+  experimental: {
+    workerThreads: false,
+    cpus: 1,
+  },
 }
 
-module.exports = nextConfig
+export default nextConfig
