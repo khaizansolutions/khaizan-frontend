@@ -1,6 +1,7 @@
-﻿export const dynamic = 'force-dynamic'
+﻿// src/app/products/page.tsx
 
-'use client'
+export const dynamic = 'force-dynamic'
+
 import { Suspense } from 'react'
 import ProductsPageContent from './ProductsPageContent'
 import { ProductCardSkeleton } from '@/components/common/LoadingSkeleton'
