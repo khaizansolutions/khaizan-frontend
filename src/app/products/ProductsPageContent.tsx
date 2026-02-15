@@ -18,10 +18,10 @@ export default async function ProductsPageContent({
   // Fetch data from Django backend
   const [productsData, categoriesData] = await Promise.all([
     getProducts({
-      category: searchParams?.category,
-      subcategory: searchParams?.subcategory,
-      product_type: searchParams?.product_type,
-      search: searchParams?.search,
+      category: searchParams?.category || undefined,
+      subcategory: searchParams?.subcategory || undefined,
+      product_type: searchParams?.product_type || undefined,
+      search: searchParams?.search || undefined,
     }),
     getCategories(),
   ])
