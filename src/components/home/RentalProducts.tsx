@@ -1,9 +1,13 @@
+// src/components/home/RentalProducts.tsx
+
 "use client";
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Calendar, Star, ArrowRight, Package } from 'lucide-react';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://khaizen-backend.onrender.com/api'
 
 interface Product {
   id: number;
@@ -17,7 +21,7 @@ interface Product {
   reviews: number;
   main_image: string | null;
   in_stock: boolean;
-  product_type: string;
+  listing_type: string;
 }
 
 export default function RentalProducts() {
@@ -25,15 +29,15 @@ export default function RentalProducts() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  fetchProducts();
-}, []);
+    fetchProducts();
+  }, []);
 
   const fetchProducts = async () => {
     try {
       // Fetch only RENTAL products
-      const response = await fetch('http://localhost:8000/api/products/?product_type=rental&limit=4');
+      const response = await fetch(`${API_URL}/products/?listing_type=rental&limit=4`);
       const data = await response.json();
-      setProducts(data.results || data);
+      setProducts(data.results || data || []);
       setLoading(false);
     } catch (error) {
       console.error('Error:', error);
@@ -51,7 +55,7 @@ export default function RentalProducts() {
           </div>
           {products.length > 0 && (
             <Link
-              href="/category/rental-products"
+              href="/products?type=rental"
               className="flex items-center gap-2 text-purple-600 hover:text-purple-800 font-semibold"
             >
               View All <ArrowRight className="w-5 h-5" />
@@ -113,7 +117,7 @@ function ProductCard({ product }: { product: Product }) {
 
       <div className="p-4">
         <p className="text-xs text-gray-500 uppercase mb-1">{product.brand}</p>
-        <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2 h-12 group-hover:text-blue-600">
+        <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2 group-hover:text-blue-600">
           {product.name}
         </h3>
         <div className="flex items-center gap-1 mb-3">

@@ -5,6 +5,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingCart, Star, ArrowRight, Package } from 'lucide-react';
 
+// Get API URL from environment variable
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://khaizen-backend.onrender.com/api'
+
 interface Product {
   id: number;
   name: string;
@@ -17,7 +20,7 @@ interface Product {
   reviews: number;
   main_image: string | null;
   in_stock: boolean;
-  product_type: string;
+  listing_type: string;
 }
 
 export default function RefurbishedProducts() {
@@ -30,10 +33,10 @@ export default function RefurbishedProducts() {
 
   const fetchProducts = async () => {
     try {
-      // Fetch only REFURBISHED products
-      const response = await fetch('http://localhost:8000/api/products/?product_type=refurbished&limit=4');
+      // Fetch only REFURBISHED products using environment variable
+      const response = await fetch(`${API_URL}/products/?listing_type=refurbished&limit=4`);
       const data = await response.json();
-      setProducts(data.results || data);
+      setProducts(data.results || data || []);
       setLoading(false);
     } catch (error) {
       console.error('Error:', error);
@@ -51,7 +54,7 @@ export default function RefurbishedProducts() {
           </div>
           {products.length > 0 && (
             <Link
-              href="/refurbished"
+              href="/products?type=refurbished"
               className="flex items-center gap-2 text-green-600 hover:text-green-800 font-semibold"
             >
               View All <ArrowRight className="w-5 h-5" />
@@ -113,7 +116,7 @@ function ProductCard({ product }: { product: Product }) {
 
       <div className="p-4">
         <p className="text-xs text-gray-500 uppercase mb-1">{product.brand}</p>
-        <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2 h-12 group-hover:text-blue-600">
+        <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2 group-hover:text-blue-600">
           {product.name}
         </h3>
         <div className="flex items-center gap-1 mb-3">
