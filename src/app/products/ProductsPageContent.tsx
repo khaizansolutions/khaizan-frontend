@@ -1,6 +1,6 @@
 // src/app/products/ProductsPageContent.tsx
 
-import { getProducts, getCategories, Product, Category } from '@/lib/api'
+import { getProducts, getCategories } from '@/lib/api'
 import ProductImage from '@/components/common/ProductImage'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -81,7 +81,7 @@ export default async function ProductsPageContent({
                 label="All Categories"
                 active={!searchParams?.category}
               />
-              {categories.map((category) => (
+              {categories.map((category: any) => (
                 <FilterLink
                   key={category.id}
                   href={`/products?category=${category.id}`}
@@ -102,7 +102,7 @@ export default async function ProductsPageContent({
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {products.map((product) => (
+              {products.map((product: any) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
@@ -114,7 +114,7 @@ export default async function ProductsPageContent({
 }
 
 // Product Card Component
-function ProductCard({ product }: { product: Product }) {
+function ProductCard({ product }: { product: any }) {
   return (
     <Link
       href={`/products/${product.slug}`}
