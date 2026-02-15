@@ -16,13 +16,15 @@ export default async function ProductsPageContent({
   };
 }) {
   // Fetch data from Django backend
+  // Build params object with only defined values
+  const params: any = {}
+  if (searchParams?.category) params.category = searchParams.category
+  if (searchParams?.subcategory) params.subcategory = searchParams.subcategory
+  if (searchParams?.product_type) params.product_type = searchParams.product_type
+  if (searchParams?.search) params.search = searchParams.search
+
   const [productsData, categoriesData] = await Promise.all([
-    getProducts({
-      category: searchParams?.category || undefined,
-      subcategory: searchParams?.subcategory || undefined,
-      product_type: searchParams?.product_type || undefined,
-      search: searchParams?.search || undefined,
-    }),
+    getProducts(params),
     getCategories(),
   ])
 
