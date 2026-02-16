@@ -1,6 +1,6 @@
 ﻿// Frontend: src/lib/api.js
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://khaizen-backend.onrender.com/api'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://khaizan-backend.onrender.com/api'
 
 // Helper function for fetch with error handling
 async function fetchAPI(endpoint, options = {}) {

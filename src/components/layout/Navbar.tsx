@@ -26,13 +26,16 @@ export default function Navbar() {
   const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
   const { getQuoteCount } = useQuote()
 
+  // Get API URL from environment variable
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://khaizan-backend.onrender.com/api'
+
   useEffect(() => {
     fetchNavbarCategories()
   }, [])
 
   const fetchNavbarCategories = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/categories/?navbar=true', {
+      const response = await fetch(`${API_URL}/categories/?navbar=true`, {
         cache: 'no-store'
       })
 
