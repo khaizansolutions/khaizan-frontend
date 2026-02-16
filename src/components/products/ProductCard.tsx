@@ -11,9 +11,12 @@ export default function ProductCard({ product }: { product: any }) {
   const categoryName = product.category_name || product.category
   const quantity = getItemQuantity(product.id)
 
+  // Use slug if available, otherwise fallback to ID
+  const productUrl = product.slug ? `/products/${product.slug}` : `/products/${product.id}`
+
   const handleWhatsApp = () => {
-    const message = "Hi, I am interested in:\n\n*" + product.name + "*\nPrice: AED " + price.toFixed(2) + "\nCategory: " + categoryName + "\n\nCould you provide more details?"
-    const whatsappUrl = "https://wa.me/971445222261?text=" + encodeURIComponent(message)
+    const message = `Hi, I am interested in:\n\n*${product.name}*\nPrice: AED ${price.toFixed(2)}\nCategory: ${categoryName}\n\nCould you provide more details?`
+    const whatsappUrl = `https://wa.me/971445222261?text=${encodeURIComponent(message)}`
     window.open(whatsappUrl, '_blank')
   }
 
@@ -33,7 +36,7 @@ export default function ProductCard({ product }: { product: any }) {
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden group hover:shadow-xl transition">
-      <Link href={"/products/" + product.id}>
+      <Link href={productUrl}>
         <div className="relative h-40 sm:h-48 md:h-56 lg:h-64 overflow-hidden bg-gray-100">
           {imageUrl && imageUrl !== '/placeholder.png' ? (
             <img src={imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition duration-300" />
@@ -48,11 +51,11 @@ export default function ProductCard({ product }: { product: any }) {
         </div>
       </Link>
       <div className="p-2 sm:p-3 md:p-4">
-        <Link href={"/products/" + product.id}>
+        <Link href={productUrl}>
           <h3 className="font-semibold text-gray-800 mb-2 hover:text-primary line-clamp-2 text-xs sm:text-sm md:text-base leading-tight">{product.name}</h3>
         </Link>
         <div className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-primary mb-2 sm:mb-3 md:mb-4">AED {price.toFixed(2)}</div>
-        
+
         {/* Desktop Buttons */}
         <div className="hidden md:flex gap-2">
           {quantity === 0 ? (

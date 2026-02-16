@@ -1,16 +1,17 @@
-// Frontend: src/app/products/[id]/page.tsx
+// Frontend: src/app/products/[slug]/page.tsx
 
 'use client'
 import { use, useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ShoppingCart, MessageCircle, Heart, Share2, Star, Truck, Shield, RefreshCcw, ArrowLeft } from 'lucide-react'
+import { ShoppingCart, MessageCircle, Star, Truck, Shield, RefreshCcw, ArrowLeft } from 'lucide-react'
 import { useQuote } from '@/context/QuoteContext'
 import { ProductDetailSkeleton } from '@/components/common/LoadingSkeleton'
 import { getProductById } from '@/data/products'
 import { api } from '@/lib/api'
 
-export default function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params)
+export default function ProductDetail({ params }: { params: Promise<{ slug: string }> | { slug: string } }) {
+  // Handle both Promise and direct params
+  const resolvedParams = params instanceof Promise ? use(params) : params
   const [loading, setLoading] = useState(true)
   const [product, setProduct] = useState<any>(null)
   const [activeTab, setActiveTab] = useState('features')
@@ -18,21 +19,29 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
   const { addToQuote } = useQuote()
 
   useEffect(() => {
-    fetchProduct()
-  }, [resolvedParams.id])
+    if (resolvedParams?.slug) {
+      fetchProduct()
+    }
+  }, [resolvedParams?.slug])
 
   const fetchProduct = async () => {
+    if (!resolvedParams?.slug) {
+      setProduct(null)
+      setLoading(false)
+      return
+    }
+
     try {
       setLoading(true)
-      
-      // Check if it's a static product (ID starts with 'static-')
-      if (resolvedParams.id.startsWith('static-')) {
-        const numericId = parseInt(resolvedParams.id.replace('static-', ''))
+
+      // Check if it's a static product (slug starts with 'static-')
+      if (resolvedParams.slug.startsWith('static-')) {
+        const numericId = parseInt(resolvedParams.slug.replace('static-', ''))
         const staticProduct = getProductById(numericId)
         setProduct(staticProduct || null)
       } else {
-        // Fetch from Django API
-        const apiProduct = await api.getProduct(resolvedParams.id)
+        // Fetch from Django API using slug
+        const apiProduct = await api.getProduct(resolvedParams.slug)
         setProduct(apiProduct)
       }
     } catch (error) {
@@ -117,8 +126,8 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
 
       <div className="container mx-auto px-3 md:px-4 py-4 md:py-8">
         {/* Back Button */}
-        <Link 
-          href="/products" 
+        <Link
+          href="/products"
           className="inline-flex items-center gap-2 text-primary hover:underline mb-4 md:mb-6 text-sm md:text-base"
         >
           <ArrowLeft size={18} className="md:w-5 md:h-5" />
@@ -154,8 +163,8 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                 {product.images.map((img: any, index: number) => {
                   const imgUrl = typeof img === 'string' ? img : img.image
                   return (
-                    <div 
-                      key={index} 
+                    <div
+                      key={index}
                       className="relative h-16 sm:h-20 md:h-24 bg-gray-100 rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition"
                     >
                       <img
@@ -244,14 +253,14 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
               <label className="block text-xs md:text-sm font-semibold mb-2">Quantity:</label>
               <div className="flex items-center gap-3 md:gap-4">
                 <div className="flex items-center border-2 border-gray-300 rounded-lg">
-                  <button 
+                  <button
                     onClick={decrementQuantity}
                     className="px-3 md:px-4 py-2 hover:bg-gray-100 transition text-lg md:text-xl"
                   >
                     -
                   </button>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     value={quantity}
                     onChange={(e) => {
                       const val = parseInt(e.target.value)
@@ -263,7 +272,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                     max={stockCount}
                     className="w-12 md:w-16 text-center border-x-2 border-gray-300 py-2 focus:outline-none text-sm md:text-base"
                   />
-                  <button 
+                  <button
                     onClick={incrementQuantity}
                     className="px-3 md:px-4 py-2 hover:bg-gray-100 transition text-lg md:text-xl"
                   >
@@ -276,14 +285,14 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
 
             {/* Action Buttons */}
             <div className="flex flex-col md:flex-row gap-2 md:gap-4 mb-6 md:mb-8">
-              <button 
+              <button
                 onClick={handleAddToQuote}
                 className="flex-1 bg-primary text-white py-3 md:py-4 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2 text-sm md:text-lg font-semibold"
               >
                 <ShoppingCart size={20} className="md:w-6 md:h-6" />
                 Add to Quote
               </button>
-              <button 
+              <button
                 onClick={handleWhatsApp}
                 className="flex-1 md:flex-initial bg-green-500 text-white px-4 md:px-6 py-3 md:py-4 rounded-lg hover:bg-green-600 transition flex items-center justify-center gap-2 text-sm md:text-base"
               >
