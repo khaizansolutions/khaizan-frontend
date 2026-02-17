@@ -23,7 +23,7 @@ export default function ProductCard({ product }: { product: any }) {
     e.preventDefault()
     e.stopPropagation()
     const message = `Hi, I am interested in:\n\n*${product.name}*\nPrice: AED ${price.toFixed(2)}\nCategory: ${categoryName}\n\nCould you provide more details?`
-    window.open(`https://wa.me/971544706523?text=${encodeURIComponent(message)}`, '_blank')
+    window.open(`https://wa.me/971507262269?text=${encodeURIComponent(message)}`, '_blank')
   }
 
   const handleAddToQuote = (e: React.MouseEvent) => {
