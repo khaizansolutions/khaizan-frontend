@@ -1,26 +1,16 @@
 'use client'
 import { useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
-import { Trash2, Plus, Minus, Send, MessageCircle, ArrowLeft, ShoppingCart } from 'lucide-react'
+import { Trash2, Plus, Minus, MessageCircle, ArrowLeft, ShoppingCart, Package } from 'lucide-react'
 import { useQuote } from '@/context/QuoteContext'
 
 export default function QuotePage() {
   const { quoteItems, removeFromQuote, updateQuantity, clearQuote } = useQuote()
   const [showForm, setShowForm] = useState(false)
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    company: '',
-    message: ''
-  })
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', company: '', message: '' })
 
   const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    })
+    setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
   const generateWhatsAppMessage = () => {
@@ -30,21 +20,15 @@ export default function QuotePage() {
     message += `Phone: ${formData.phone}\n`
     if (formData.company) message += `Company: ${formData.company}\n`
     message += `\n*Products:*\n\n`
-    
     quoteItems.forEach((item, index) => {
       message += `${index + 1}. ${item.name}\n`
-      message += `   Quantity: ${item.quantity}\n`
+      message += `   Qty: ${item.quantity}\n`
       message += `   Price: AED ${item.price.toFixed(2)}\n`
       message += `   Subtotal: AED ${(item.price * item.quantity).toFixed(2)}\n\n`
     })
-    
-    const total = quoteItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+    const total = quoteItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
     message += `*Total: AED ${total.toFixed(2)}*\n\n`
-    
-    if (formData.message) {
-      message += `Additional Message:\n${formData.message}`
-    }
-    
+    if (formData.message) message += `Note:\n${formData.message}`
     return message
   }
 
@@ -53,267 +37,173 @@ export default function QuotePage() {
       alert('Please fill in Name and Phone number')
       return
     }
-    
     const message = generateWhatsAppMessage()
-    const whatsappUrl = `https://wa.me/971445222261?text=${encodeURIComponent(message)}`
-    window.open(whatsappUrl, '_blank')
-    
+    window.open(`https://wa.me/971507262269?text=${encodeURIComponent(message)}`, '_blank')
     setFormData({ name: '', email: '', phone: '', company: '', message: '' })
     clearQuote()
     setShowForm(false)
   }
 
-  const handleEmailSubmit = (e) => {
-    e.preventDefault()
-    alert('Quote request sent! We will contact you soon.')
-    setFormData({ name: '', email: '', phone: '', company: '', message: '' })
-    clearQuote()
-    setShowForm(false)
-  }
+  const total = quoteItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const totalQty = quoteItems.reduce((sum, item) => sum + item.quantity, 0)
 
-  // Empty State
+  // ── Empty State ──
   if (quoteItems.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-12 md:py-16">
-        <div className="text-center">
-          <div className="text-gray-400 mb-4">
-            <ShoppingCart size={60} className="mx-auto md:w-20 md:h-20" />
-          </div>
-          <h2 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4">Your Quote List is Empty</h2>
-          <p className="text-gray-600 mb-6 md:mb-8 text-sm md:text-base">Add products to request a quotation</p>
-          <Link href="/products">
-            <button className="bg-primary text-white px-6 md:px-8 py-2 md:py-3 rounded-lg hover:bg-blue-700 transition text-sm md:text-base">
-              Browse Products
-            </button>
-          </Link>
-        </div>
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 text-center">
+        <ShoppingCart size={48} className="text-gray-300 mb-4" />
+        <h2 className="text-xl font-bold text-gray-800 mb-2">Your Quote List is Empty</h2>
+        <p className="text-sm text-gray-500 mb-6">Add products to request a quotation</p>
+        <Link href="/products" className="bg-blue-600 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-700 transition">
+          Browse Products
+        </Link>
       </div>
     )
   }
 
-  const total = quoteItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-
   return (
-    <div className="bg-gray-50 min-h-screen py-4 md:py-8">
-      <div className="container mx-auto px-3 md:px-4">
-        {/* Back Button */}
-        <Link 
-          href="/products" 
-          className="inline-flex items-center gap-2 text-primary hover:underline mb-4 md:mb-6 text-sm md:text-base"
-        >
-          <ArrowLeft size={18} className="md:w-5 md:h-5" />
-          Continue Shopping
+    <div className="bg-gray-50 min-h-screen pb-32 md:pb-10">
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4">
+
+        {/* ── Header ── */}
+        <Link href="/products" className="inline-flex items-center gap-1.5 text-blue-600 text-sm mb-3 hover:underline">
+          <ArrowLeft size={15} /> Continue Shopping
         </Link>
+        <h1 className="text-xl font-bold text-gray-900 mb-4">Request Quotation</h1>
 
-        {/* Page Title */}
-        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-6 md:mb-8">Request Quotation</h1>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-          {/* Quote Items */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
-              <div className="flex justify-between items-center mb-4 md:mb-6">
-                <h2 className="text-lg md:text-xl lg:text-2xl font-bold">
-                  Selected Products ({quoteItems.length})
-                </h2>
-                <button 
-                  onClick={clearQuote}
-                  className="text-red-500 hover:text-red-700 text-xs md:text-sm"
-                >
-                  Clear All
-                </button>
-              </div>
+          {/* ── Product List ── */}
+          <div className="lg:col-span-2 space-y-2.5">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-sm font-semibold text-gray-700">
+                Selected Products <span className="text-gray-400">({quoteItems.length})</span>
+              </p>
+              <button onClick={clearQuote} className="text-xs text-red-500 hover:text-red-700 font-medium">
+                Clear All
+              </button>
+            </div>
 
-              <div className="space-y-3 md:space-y-4">
-                {quoteItems.map((item) => (
-                  <div key={item.id} className="flex gap-3 md:gap-4 p-3 md:p-4 border rounded-lg">
-                    {/* Product Image */}
-                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 flex-shrink-0">
-                      <Image
-                        src={item.image}
-                        alt={item.name}
-                        fill
-                        className="object-cover rounded"
-                      />
-                    </div>
+            {quoteItems.map((item) => (
+              <div key={item.id} className="bg-white rounded-xl border border-gray-100 p-3 flex gap-3">
+                {/* Image */}
+                <div className="w-16 h-16 rounded-lg bg-gray-50 border border-gray-100 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                  {item.image ? (
+                    <img src={item.image} alt={item.name} className="w-full h-full object-contain p-1" />
+                  ) : (
+                    <Package size={20} className="text-gray-300" />
+                  )}
+                </div>
 
-                    {/* Product Info */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold mb-1 text-sm md:text-base line-clamp-2">
-                        {item.name}
-                      </h3>
-                      <p className="text-xs md:text-sm text-gray-600 mb-2">{item.category}</p>
-                      <p className="text-base md:text-lg font-bold text-primary">
-                        AED {item.price.toFixed(2)}
-                      </p>
-                      
-                      {/* Mobile Quantity Controls */}
-                      <div className="flex items-center gap-2 mt-3 md:hidden">
-                        <button
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          className="w-7 h-7 border rounded hover:bg-gray-100 flex items-center justify-center"
-                        >
-                          <Minus size={14} />
-                        </button>
-                        <span className="w-10 text-center font-semibold text-sm">{item.quantity}</span>
-                        <button
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="w-7 h-7 border rounded hover:bg-gray-100 flex items-center justify-center"
-                        >
-                          <Plus size={14} />
-                        </button>
-                        <span className="text-xs text-gray-600 ml-2">
-                          AED {(item.price * item.quantity).toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Desktop Quantity & Remove */}
-                    <div className="hidden md:flex flex-col items-end justify-between">
-                      <button
-                        onClick={() => removeFromQuote(item.id)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 size={20} />
-                      </button>
-
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          className="w-8 h-8 border rounded hover:bg-gray-100 flex items-center justify-center"
-                        >
-                          <Minus size={16} />
-                        </button>
-                        <span className="w-12 text-center font-semibold">{item.quantity}</span>
-                        <button
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="w-8 h-8 border rounded hover:bg-gray-100 flex items-center justify-center"
-                        >
-                          <Plus size={16} />
-                        </button>
-                      </div>
-
-                      <p className="text-sm text-gray-600 mt-2">
-                        Subtotal: AED {(item.price * item.quantity).toFixed(2)}
-                      </p>
-                    </div>
-
-                    {/* Mobile Remove Button */}
-                    <button
-                      onClick={() => removeFromQuote(item.id)}
-                      className="md:hidden text-red-500 hover:text-red-700 self-start"
-                    >
-                      <Trash2 size={18} />
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="text-xs font-semibold text-gray-800 line-clamp-2 leading-snug">
+                      {item.name}
+                    </h3>
+                    <button onClick={() => removeFromQuote(item.id)} className="text-red-400 hover:text-red-600 flex-shrink-0 mt-0.5">
+                      <Trash2 size={14} />
                     </button>
                   </div>
-                ))}
+                  <p className="text-[10px] text-gray-400 mt-0.5">{item.category}</p>
+                  <p className="text-sm font-bold text-blue-600 mt-1">AED {item.price.toFixed(2)}</p>
+
+                  {/* Qty + Subtotal */}
+                  <div className="flex items-center justify-between mt-2">
+                    <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        className="px-2 py-1 hover:bg-gray-50 text-gray-600 transition"
+                      >
+                        <Minus size={11} />
+                      </button>
+                      <span className="px-2.5 text-xs font-bold">{item.quantity}</span>
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        className="px-2 py-1 hover:bg-gray-50 text-gray-600 transition"
+                      >
+                        <Plus size={11} />
+                      </button>
+                    </div>
+                    <span className="text-xs font-semibold text-gray-600">
+                      AED {(item.price * item.quantity).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
 
-          {/* Summary & Form - Sticky on Desktop */}
+          {/* ── Summary & Form ── */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-md p-4 md:p-6 lg:sticky lg:top-24">
-              <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Quote Summary</h2>
-              
-              <div className="space-y-2 md:space-y-3 mb-4 md:mb-6">
-                <div className="flex justify-between text-sm md:text-base">
-                  <span className="text-gray-600">Items:</span>
-                  <span className="font-semibold">{quoteItems.length}</span>
+            <div className="bg-white rounded-xl border border-gray-100 p-4 lg:sticky lg:top-24">
+              <h2 className="text-sm font-bold text-gray-800 mb-3">Quote Summary</h2>
+
+              <div className="space-y-2 mb-4 text-sm">
+                <div className="flex justify-between text-gray-600">
+                  <span>Items</span>
+                  <span className="font-semibold text-gray-800">{quoteItems.length}</span>
                 </div>
-                <div className="flex justify-between text-sm md:text-base">
-                  <span className="text-gray-600">Total Quantity:</span>
-                  <span className="font-semibold">
-                    {quoteItems.reduce((sum, item) => sum + item.quantity, 0)}
-                  </span>
+                <div className="flex justify-between text-gray-600">
+                  <span>Total Qty</span>
+                  <span className="font-semibold text-gray-800">{totalQty}</span>
                 </div>
-                <div className="border-t pt-3 flex justify-between text-lg md:text-xl font-bold">
-                  <span>Estimated Total:</span>
-                  <span className="text-primary">AED {total.toFixed(2)}</span>
+                <div className="flex justify-between border-t pt-2 mt-2">
+                  <span className="font-bold text-gray-800">Est. Total</span>
+                  <span className="font-bold text-blue-600">AED {total.toFixed(2)}</span>
                 </div>
               </div>
 
-              <p className="text-xs md:text-sm text-gray-600 mb-4 md:mb-6">
-                *Final price will be confirmed in the quotation
-              </p>
+              <p className="text-[10px] text-gray-400 mb-4">*Final price confirmed in quotation</p>
 
               {!showForm ? (
                 <button
                   onClick={() => setShowForm(true)}
-                  className="w-full bg-primary text-white py-3 rounded-lg hover:bg-blue-700 transition font-semibold text-sm md:text-base"
+                  className="w-full bg-blue-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-700 transition"
                 >
                   Request Quotation
                 </button>
               ) : (
-                <div className="space-y-3 md:space-y-4">
-                  <h3 className="font-bold text-base md:text-lg">Your Details</h3>
-                  
-                  <input
-                    type="text"
-                    name="name"
-                    placeholder="Full Name *"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className="w-full px-3 md:px-4 py-2 border rounded-lg focus:outline-none focus:border-primary text-sm md:text-base"
-                    required
-                  />
-                  
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="w-full px-3 md:px-4 py-2 border rounded-lg focus:outline-none focus:border-primary text-sm md:text-base"
-                  />
-                  
-                  <input
-                    type="tel"
-                    name="phone"
-                    placeholder="Phone Number *"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="w-full px-3 md:px-4 py-2 border rounded-lg focus:outline-none focus:border-primary text-sm md:text-base"
-                    required
-                  />
-                  
-                  <input
-                    type="text"
-                    name="company"
-                    placeholder="Company Name (Optional)"
-                    value={formData.company}
-                    onChange={handleInputChange}
-                    className="w-full px-3 md:px-4 py-2 border rounded-lg focus:outline-none focus:border-primary text-sm md:text-base"
-                  />
-                  
+                <div className="space-y-2.5">
+                  <h3 className="text-sm font-bold text-gray-800">Your Details</h3>
+
+                  {[
+                    { name: 'name', placeholder: 'Full Name *', type: 'text' },
+                    { name: 'email', placeholder: 'Email', type: 'email' },
+                    { name: 'phone', placeholder: 'Phone Number *', type: 'tel' },
+                    { name: 'company', placeholder: 'Company (Optional)', type: 'text' },
+                  ].map((field) => (
+                    <input
+                      key={field.name}
+                      type={field.type}
+                      name={field.name}
+                      placeholder={field.placeholder}
+                      value={formData[field.name]}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-400"
+                    />
+                  ))}
+
                   <textarea
                     name="message"
-                    placeholder="Additional requirements or questions..."
+                    placeholder="Additional notes..."
                     value={formData.message}
                     onChange={handleInputChange}
-                    rows={3}
-                    className="w-full px-3 md:px-4 py-2 border rounded-lg focus:outline-none focus:border-primary text-sm md:text-base"
+                    rows={2}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-400 resize-none"
                   />
 
                   <button
                     onClick={handleWhatsAppSubmit}
-                    className="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition font-semibold flex items-center justify-center gap-2 text-sm md:text-base"
+                    className="w-full bg-green-500 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-green-600 transition flex items-center justify-center gap-2"
                   >
-                    <MessageCircle size={18} className="md:w-5 md:h-5" />
+                    <MessageCircle size={15} />
                     Send via WhatsApp
                   </button>
 
                   <button
-                    onClick={handleEmailSubmit}
-                    className="w-full bg-primary text-white py-3 rounded-lg hover:bg-blue-700 transition font-semibold flex items-center justify-center gap-2 text-sm md:text-base"
-                  >
-                    <Send size={18} className="md:w-5 md:h-5" />
-                    Send via Email
-                  </button>
-
-                  <button
                     onClick={() => setShowForm(false)}
-                    className="w-full text-gray-600 hover:text-gray-800 py-2 text-sm md:text-base"
+                    className="w-full text-gray-400 hover:text-gray-600 py-1.5 text-xs"
                   >
                     Cancel
                   </button>
@@ -322,6 +212,21 @@ export default function QuotePage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ── Mobile Sticky Bottom ── */}
+      <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-white border-t border-gray-200 px-3 py-2.5 z-20">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs text-gray-500">{totalQty} items · Est. total</span>
+          <span className="text-sm font-bold text-blue-600">AED {total.toFixed(2)}</span>
+        </div>
+        <button
+          onClick={() => setShowForm(true)}
+          className="w-full bg-blue-600 text-white py-3 rounded-xl text-sm font-semibold hover:bg-blue-700 transition flex items-center justify-center gap-2"
+        >
+          <MessageCircle size={15} />
+          Request Quotation via WhatsApp
+        </button>
       </div>
     </div>
   )
