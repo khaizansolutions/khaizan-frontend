@@ -12,7 +12,7 @@ async function fetchAllProducts() {
   let hasMore = true
 
   while (hasMore) {
-    const data = await api.getProducts({ page: currentPage })
+    const data = await api.getProducts({ page: currentPage, page_size: 15 } as any)
     if (data && data.results && data.results.length > 0) {
       allProducts.push(...data.results)
       hasMore = data.next !== null
