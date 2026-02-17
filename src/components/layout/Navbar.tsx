@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { ShoppingCart, Menu, X, ChevronDown } from 'lucide-react'
 import { useQuote } from '@/context/QuoteContext'
@@ -19,39 +19,18 @@ interface NavCategory {
   subcategories: Subcategory[]
 }
 
-export default function Navbar() {
+// ⭐ Accept initialCategories from server (layout.tsx)
+interface NavbarProps {
+  initialCategories?: NavCategory[]
+}
+
+export default function Navbar({ initialCategories = [] }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [categories, setCategories] = useState<NavCategory[]>([])
-  const [loading, setLoading] = useState(true)
   const [activeDropdown, setActiveDropdown] = useState<number | null>(null)
   const { getQuoteCount } = useQuote()
 
-  // Get API URL from environment variable
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://khaizan-backend.onrender.com/api'
-
-  useEffect(() => {
-    fetchNavbarCategories()
-  }, [])
-
-  const fetchNavbarCategories = async () => {
-    try {
-      const response = await fetch(`${API_URL}/categories/?navbar=true`, {
-        cache: 'no-store'
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch categories')
-      }
-
-      const data = await response.json()
-      setCategories(data.results || data)
-    } catch (error) {
-      console.error('Error fetching navbar categories:', error)
-      setCategories([])
-    } finally {
-      setLoading(false)
-    }
-  }
+  // ⭐ Use server-fetched categories directly - no useEffect, no loading!
+  const categories = initialCategories
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
@@ -86,13 +65,7 @@ export default function Navbar() {
 
         {/* Categories - Desktop */}
         <div className="hidden md:flex items-center justify-center gap-8 py-3 border-t">
-          {loading ? (
-            <>
-              {[1,2,3,4,5,6].map(i => (
-                <div key={i} className="h-6 w-24 bg-gray-200 rounded animate-pulse"></div>
-              ))}
-            </>
-          ) : categories.length > 0 ? (
+          {categories.length > 0 ? (
             categories.map((category) => (
               <div
                 key={category.id}
@@ -136,19 +109,11 @@ export default function Navbar() {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t">
-            {/* Smart Search - Mobile */}
             <div className="mb-4">
               <SmartSearch onClose={() => setMobileMenuOpen(false)} />
             </div>
 
-            {/* Mobile Categories */}
-            {loading ? (
-              <div className="space-y-2">
-                {[1,2,3,4,5,6].map(i => (
-                  <div key={i} className="h-10 bg-gray-200 rounded animate-pulse"></div>
-                ))}
-              </div>
-            ) : categories.length > 0 ? (
+            {categories.length > 0 ? (
               categories.map((category) => (
                 <div key={category.id}>
                   <Link
@@ -159,7 +124,6 @@ export default function Navbar() {
                     {category.name}
                   </Link>
 
-                  {/* Subcategories under each category (mobile) */}
                   {category.subcategories && category.subcategories.length > 0 && (
                     <div className="pl-8 bg-gray-50">
                       {category.subcategories.map((subcategory) => (
