@@ -93,7 +93,7 @@ export default function ProductDetail({ params }: { params: Promise<{ slug: stri
 
   const handleWhatsApp = () => {
     const message = `Hi, I'm interested in:\n\n*${product.name}*\nQuantity: ${quantity}\nPrice: AED ${price.toFixed(2)}\nSKU: ${product.sku}\n\nCould you provide more details?`
-    const whatsappUrl = `https://wa.me/971445222261?text=${encodeURIComponent(message)}`
+    const whatsappUrl = `https://wa.me/971544706523?text=${encodeURIComponent(message)}`
     window.open(whatsappUrl, '_blank')
   }
 

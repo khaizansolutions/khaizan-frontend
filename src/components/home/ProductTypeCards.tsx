@@ -1,28 +1,34 @@
 import Link from 'next/link'
-import { Sparkles, Package, Calendar } from 'lucide-react'
+import { Sparkles, Package, Calendar, ArrowRight } from 'lucide-react'
 
 export default function ProductTypeCards() {
   const productTypes = [
     {
       name: 'New Products',
       icon: Sparkles,
-      color: 'bg-blue-100 text-blue-600',
-      slug: 'products',  // Changed from 'new' to 'products'
-      description: 'Latest arrivals in our store'
+      iconBg: 'bg-blue-100',
+      iconColor: 'text-blue-600',
+      arrowColor: 'text-blue-600',
+      href: '/products?product_type=new',  // ⭐ Redirects to products with filter
+      description: 'Latest arrivals in our store',
     },
     {
       name: 'Refurbished Products',
       icon: Package,
-      color: 'bg-green-100 text-green-600',
-      slug: 'refurbished',
-      description: 'Quality products at great prices'
+      iconBg: 'bg-green-100',
+      iconColor: 'text-green-600',
+      arrowColor: 'text-green-600',
+      href: '/products?product_type=refurbished',  // ⭐ Redirects to products with filter
+      description: 'Quality products at great prices',
     },
     {
       name: 'Rental Products',
       icon: Calendar,
-      color: 'bg-purple-100 text-purple-600',
-      slug: 'rental',
-      description: 'Rent equipment for your projects'
+      iconBg: 'bg-purple-100',
+      iconColor: 'text-purple-600',
+      arrowColor: 'text-purple-600',
+      href: '/products?product_type=rental',  // ⭐ Redirects to products with filter
+      description: 'Rent equipment for your projects',
     },
   ]
 
@@ -33,15 +39,18 @@ export default function ProductTypeCards() {
         {productTypes.map((type) => (
           <Link
             key={type.name}
-            href={`/${type.slug}`}
+            href={type.href}
             className="group"
           >
-            <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition text-center">
-              <div className={`${type.color} w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center group-hover:scale-110 transition`}>
-                <type.icon size={40} />
+            <div className="bg-white p-8 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 text-center">
+              <div className={`${type.iconBg} w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                <type.icon size={40} className={type.iconColor} />
               </div>
               <h3 className="font-semibold text-gray-800 text-lg mb-2">{type.name}</h3>
-              <p className="text-sm text-gray-600">{type.description}</p>
+              <p className="text-sm text-gray-600 mb-4">{type.description}</p>
+              <div className={`flex items-center justify-center gap-1 text-sm font-semibold ${type.arrowColor} group-hover:gap-2 transition-all`}>
+                Browse <ArrowRight size={16} />
+              </div>
             </div>
           </Link>
         ))}

@@ -1,234 +1,247 @@
 // src/app/products/ProductsPageContent.tsx
+'use client'
 
-import { getProducts, getCategories } from '@/lib/api'
-import ProductImage from '@/components/common/ProductImage'
-import Link from 'next/link'
-import { Suspense } from 'react'
+import { useState, useEffect, useMemo } from 'react'
+import ProductCard from '@/components/products/ProductCard'
+import ProductFilters from '@/components/products/ProductFilters'
 
-export default async function ProductsPageContent({
-  searchParams,
-}: {
-  searchParams?: {
-    category?: string;
-    subcategory?: string;
-    product_type?: 'new' | 'refurbished' | 'rental';
-    search?: string;
-  };
-}) {
-  // Fetch data from Django backend
-  // Build params object with only defined values
-  const params: any = {}
-  if (searchParams?.category) params.category = searchParams.category
-  if (searchParams?.subcategory) params.subcategory = searchParams.subcategory
-  if (searchParams?.product_type) params.product_type = searchParams.product_type
-  if (searchParams?.search) params.search = searchParams.search
+interface Product {
+  id: number
+  slug: string
+  name: string
+  brand: string
+  price: string
+  original_price?: string
+  discount: number
+  main_image: string
+  image?: string
+  category_name: string
+  category: string
+  category_id: number
+  subcategory_id?: number
+  product_type: 'new' | 'refurbished' | 'rental'
+  product_type_display: string
+  is_featured: boolean
+  in_stock: boolean
+  stock_count: number
+  rating: number
+  reviews: number
+}
 
-  const [productsData, categoriesData] = await Promise.all([
-    getProducts(params),
-    getCategories(),
-  ])
+interface Category {
+  id: number
+  name: string
+  product_count: number
+}
 
-  // Ensure we have arrays
-  const products = productsData?.results || []
-  const categories = Array.isArray(categoriesData) ? categoriesData : []
+interface ProductsPageContentProps {
+  initialProducts: Product[]
+  initialCategories: Category[]
+  totalCount: number
+  // ⭐ ADDED: 3 new optional props from URL
+  initialProductType?: string | null
+  initialCategory?: string | null
+  initialSearch?: string | null
+}
+
+export default function ProductsPageContent({
+  initialProducts,
+  initialCategories,
+  totalCount,
+  // ⭐ ADDED: Destructure new props
+  initialProductType,
+  initialCategory,
+  initialSearch,
+}: ProductsPageContentProps) {
+  // Filter states
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(
+    initialCategory ? [initialCategory] : []  // ⭐ CHANGED: Pre-set from URL
+  )
+  const [selectedProductTypes, setSelectedProductTypes] = useState<string[]>(
+    initialProductType ? [initialProductType] : []  // ⭐ CHANGED: Pre-set from URL
+  )
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000])
+  const [searchQuery, setSearchQuery] = useState(initialSearch || '')  // ⭐ CHANGED: Pre-set from URL
+
+  // Calculate max price from products
+  const maxPrice = useMemo(() => {
+    const prices = initialProducts.map((p) => parseFloat(p.price))
+    return Math.ceil(Math.max(...prices, 10000))
+  }, [initialProducts])
+
+  // Set initial price range
+  useEffect(() => {
+    setPriceRange([0, maxPrice])
+  }, [maxPrice])
+
+  // Product types with counts
+  const productTypes = useMemo(
+    () => [
+      {
+        value: 'new',
+        label: '🆕 New',
+        count: initialProducts.filter((p) => p.product_type === 'new').length,
+      },
+      {
+        value: 'refurbished',
+        label: '🔧 Refurbished',
+        count: initialProducts.filter((p) => p.product_type === 'refurbished').length,
+      },
+      {
+        value: 'rental',
+        label: '📅 Rental',
+        count: initialProducts.filter((p) => p.product_type === 'rental').length,
+      },
+    ],
+    [initialProducts]
+  )
+
+  // Filter products
+  const filteredProducts = useMemo(() => {
+    return initialProducts.filter((product) => {
+      // Category filter
+      if (
+        selectedCategories.length > 0 &&
+        !selectedCategories.includes(product.category_id.toString())
+      ) {
+        return false
+      }
+
+      // Product type filter
+      if (
+        selectedProductTypes.length > 0 &&
+        !selectedProductTypes.includes(product.product_type)
+      ) {
+        return false
+      }
+
+      // Price filter
+      const price = parseFloat(product.price)
+      if (price < priceRange[0] || price > priceRange[1]) {
+        return false
+      }
+
+      // Search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase()
+        const searchableText =
+          `${product.name} ${product.brand} ${product.category_name || product.category}`.toLowerCase()
+        if (!searchableText.includes(query)) {
+          return false
+        }
+      }
+
+      return true
+    })
+  }, [initialProducts, selectedCategories, selectedProductTypes, priceRange, searchQuery])
+
+  // Handlers
+  const handleCategoryChange = (categoryId: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(categoryId) ? prev.filter((id) => id !== categoryId) : [...prev, categoryId]
+    )
+  }
+
+  const handleProductTypeChange = (type: string) => {
+    setSelectedProductTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+    )
+  }
+
+  const handlePriceChange = (range: [number, number]) => {
+    setPriceRange(range)
+  }
+
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query)
+  }
+
+  const handleClearFilters = () => {
+    setSelectedCategories([])
+    setSelectedProductTypes([])
+    setPriceRange([0, maxPrice])
+    setSearchQuery('')
+  }
 
   return (
-    <div className="container mx-auto px-4 py-6 md:py-8">
-      {/* Header */}
-      <div className="mb-6 md:mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-          Our Products
-        </h1>
-        <p className="text-gray-600">
-          {productsData?.count || 0} product{(productsData?.count || 0) !== 1 ? 's' : ''} available
-        </p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Our Products
+          </h1>
+          <p className="text-lg text-gray-600">
+            Showing{' '}
+            <span className="font-bold text-blue-600">{filteredProducts.length}</span> of{' '}
+            <span className="font-semibold text-gray-900">{totalCount}</span> products
+          </p>
+        </div>
 
-      <div className="flex flex-col md:flex-row gap-6 md:gap-8">
-        {/* Sidebar - Filters */}
-        <aside className="w-full md:w-64 space-y-6">
-          {/* Product Type Filter */}
-          <div className="bg-white p-4 rounded-lg shadow-sm border">
-            <h3 className="font-semibold text-lg mb-3">Product Type</h3>
-            <div className="space-y-2">
-              <FilterLink
-                href="/products"
-                label="All Products"
-                active={!searchParams?.product_type}
-              />
-              <FilterLink
-                href="/products?product_type=new"
-                label="🆕 New"
-                active={searchParams?.product_type === 'new'}
-              />
-              <FilterLink
-                href="/products?product_type=refurbished"
-                label="🔧 Refurbished"
-                active={searchParams?.product_type === 'refurbished'}
-              />
-              <FilterLink
-                href="/products?product_type=rental"
-                label="📅 Rental"
-                active={searchParams?.product_type === 'rental'}
-              />
-            </div>
-          </div>
+        {/* Main Content */}
+        <div className="flex gap-8">
+          {/* Filters Sidebar */}
+          <ProductFilters
+            categories={initialCategories.map((cat) => ({
+              id: cat.id,
+              name: cat.name,
+              count: initialProducts.filter((p) => p.category_id === cat.id).length,
+            }))}
+            selectedCategories={selectedCategories}
+            priceRange={priceRange}
+            maxPrice={maxPrice}
+            searchQuery={searchQuery}
+            onCategoryChange={handleCategoryChange}
+            onPriceChange={handlePriceChange}
+            onSearchChange={handleSearchChange}
+            onApplyFilters={() => {}}
+            onClearFilters={handleClearFilters}
+            productTypes={productTypes}
+            selectedProductTypes={selectedProductTypes}
+            onProductTypeChange={handleProductTypeChange}
+          />
 
-          {/* Categories Filter */}
-          <div className="bg-white p-4 rounded-lg shadow-sm border">
-            <h3 className="font-semibold text-lg mb-3">Categories</h3>
-            <div className="space-y-2">
-              <FilterLink
-                href="/products"
-                label="All Categories"
-                active={!searchParams?.category}
-              />
-              {categories.map((category: any) => (
-                <FilterLink
-                  key={category.id}
-                  href={`/products?category=${category.id}`}
-                  label={category.name}
-                  active={searchParams?.category === category.id.toString()}
-                  count={category.product_count}
-                />
-              ))}
-            </div>
-          </div>
-        </aside>
-
-        {/* Products Grid */}
-        <main className="flex-1">
-          {products.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No products found</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {products.map((product: any) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          )}
-        </main>
+          {/* Products Grid */}
+          <main className="flex-1">
+            {filteredProducts.length === 0 ? (
+              <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-12 text-center">
+                <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full mx-auto mb-6 flex items-center justify-center">
+                  <svg
+                    className="w-12 h-12 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">No products found</h3>
+                <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                  We couldn't find any products matching your filters. Try adjusting your search
+                  criteria.
+                </p>
+                <button
+                  onClick={handleClearFilters}
+                  className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                >
+                  Clear All Filters
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+                {filteredProducts.map((product) => (
+                  <ProductCard key={`product-${product.id}-${product.slug}`} product={product} />
+                ))}
+              </div>
+            )}
+          </main>
+        </div>
       </div>
     </div>
-  )
-}
-
-// Product Card Component
-function ProductCard({ product }: { product: any }) {
-  return (
-    <Link
-      href={`/products/${product.slug}`}
-      className="group bg-white rounded-lg shadow-sm border hover:shadow-md transition-all duration-200"
-    >
-      {/* Product Image */}
-      <div className="relative aspect-square overflow-hidden rounded-t-lg bg-gray-100">
-        <ProductImage
-          src={product.main_image}
-          alt={product.name}
-          fill
-          className="group-hover:scale-105 transition-transform duration-200"
-        />
-
-        {/* Badges */}
-        <div className="absolute top-2 left-2 flex flex-col gap-1">
-          {product.is_featured && (
-            <span className="bg-yellow-500 text-white text-xs font-semibold px-2 py-1 rounded">
-              ⭐ Featured
-            </span>
-          )}
-          {product.discount > 0 && (
-            <span className="bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded">
-              -{product.discount}%
-            </span>
-          )}
-          {product.product_type !== 'new' && (
-            <span className={`text-white text-xs font-semibold px-2 py-1 rounded ${
-              product.product_type === 'refurbished' ? 'bg-orange-500' : 'bg-blue-500'
-            }`}>
-              {product.product_type_display}
-            </span>
-          )}
-        </div>
-
-        {/* Stock Status */}
-        {!product.in_stock && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <span className="bg-red-500 text-white font-semibold px-4 py-2 rounded">
-              Out of Stock
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Product Info */}
-      <div className="p-4">
-        {/* Category & Brand */}
-        <p className="text-xs text-gray-500 mb-1">
-          {product.category_name} • {product.brand}
-        </p>
-
-        {/* Product Name */}
-        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
-          {product.name}
-        </h3>
-
-        {/* Price */}
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-lg font-bold text-gray-900">
-            AED {product.price}
-          </span>
-          {product.original_price && (
-            <span className="text-sm text-gray-400 line-through">
-              AED {product.original_price}
-            </span>
-          )}
-        </div>
-
-        {/* Rating */}
-        <div className="flex items-center gap-1 text-sm">
-          <span className="text-yellow-400">★</span>
-          <span className="font-medium">{product.rating}</span>
-          <span className="text-gray-400">({product.reviews})</span>
-        </div>
-
-        {/* Stock Info */}
-        {product.in_stock && (
-          <p className="text-xs text-green-600 mt-2">
-            {product.stock_count} in stock
-          </p>
-        )}
-      </div>
-    </Link>
-  )
-}
-
-// Filter Link Component
-function FilterLink({
-  href,
-  label,
-  active,
-  count
-}: {
-  href: string;
-  label: string;
-  active: boolean;
-  count?: number;
-}) {
-  return (
-    <Link
-      href={href}
-      className={`block px-3 py-2 rounded-md text-sm transition-colors ${
-        active
-          ? 'bg-blue-50 text-blue-600 font-medium'
-          : 'text-gray-700 hover:bg-gray-50'
-      }`}
-    >
-      <span>{label}</span>
-      {count !== undefined && (
-        <span className="text-gray-400 text-xs ml-2">({count})</span>
-      )}
-    </Link>
   )
 }

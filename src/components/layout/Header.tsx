@@ -7,20 +7,20 @@ export default function Header() {
       <div className="container mx-auto flex justify-between items-center text-xs md:text-sm">
         {/* Contact Info */}
         <div className="flex items-center gap-3 md:gap-6">
-          <a 
-            href="tel:+97144522261" 
+          <a
+            href="tel:+971544706523"
             className="flex items-center gap-1 md:gap-2 hover:text-secondary transition"
           >
             <Phone size={14} className="md:w-4 md:h-4" />
-            <span className="hidden sm:inline">+971 4 452 2261</span>
+            <span className="hidden sm:inline">+971 544 706 523</span>
             <span className="sm:hidden">Call</span>
           </a>
-          <a 
-            href="mailto:info@khaizensolutions.com" 
+          <a
+            href="mailto:khaizanstoragesolutions@gmail.com"
             className="flex items-center gap-1 md:gap-2 hover:text-secondary transition"
           >
             <Mail size={14} className="md:w-4 md:h-4" />
-            <span className="hidden lg:inline">info@khaizensolutions.com</span>
+            <span className="hidden lg:inline">khaizanstoragesolutions@gmail.com</span>
             <span className="lg:hidden hidden sm:inline">Email</span>
           </a>
         </div>

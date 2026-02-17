@@ -14,7 +14,10 @@ async function fetchAPI(endpoint, options = {}) {
     })
 
     if (!res.ok) {
-      console.error(`API Error: ${endpoint} - ${res.status} ${res.statusText}`)
+      // Don't log 404s for product lookups (expected when using fallback)
+      if (!(res.status === 404 && endpoint.includes('/products/'))) {
+        console.error(`API Error: ${endpoint} - ${res.status} ${res.statusText}`)
+      }
       return null
     }
 
@@ -36,11 +39,15 @@ export const api = {
    * @param {string} params.product_type - 'new', 'refurbished', or 'rental'
    * @param {string} params.search - Search query
    * @param {number} params.page - Page number
+   * @param {number} params.page_size - Number of products per page
    * @param {boolean} params.is_featured - Filter featured products
    */
   async getProducts(params = {}) {
     try {
       const searchParams = new URLSearchParams()
+
+      // IMPORTANT: Add page_size parameter (default to 1000 if not specified)
+      searchParams.append('page_size', params.page_size || '1000')
 
       if (params.category) searchParams.append('subcategory__category', params.category)
       if (params.subcategory) searchParams.append('subcategory', params.subcategory)
@@ -50,7 +57,7 @@ export const api = {
       if (params.is_featured) searchParams.append('is_featured', 'true')
 
       const queryString = searchParams.toString()
-      const endpoint = queryString ? `/products/?${queryString}` : '/products/'
+      const endpoint = `/products/?${queryString}`
 
       const data = await fetchAPI(endpoint, {
         next: { revalidate: 30 } // Cache for 30 seconds
@@ -69,10 +76,37 @@ export const api = {
    */
   async getProduct(slugOrId) {
     try {
-      const data = await fetchAPI(`/products/${slugOrId}/`, {
+      // Method 1: Try direct API endpoint first (works if Django supports slug/id lookup)
+      const directData = await fetchAPI(`/products/${slugOrId}/`, {
         next: { revalidate: 60 }
       })
-      return data
+
+      if (directData) {
+        return directData
+      }
+
+      // Method 2: If direct fetch fails, search in all products
+      const productsData = await this.getProducts({ page_size: 1000 })
+
+      if (productsData?.results && productsData.results.length > 0) {
+        // Try to find by slug first
+        let product = productsData.results.find(
+          (p) => p.slug === slugOrId || p.slug === slugOrId.toString()
+        )
+
+        // If not found by slug, try by ID
+        if (!product) {
+          product = productsData.results.find(
+            (p) => p.id.toString() === slugOrId.toString()
+          )
+        }
+
+        if (product) {
+          return product
+        }
+      }
+
+      return null
     } catch (error) {
       console.error('getProduct failed:', error)
       return null
