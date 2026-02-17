@@ -1,61 +1,81 @@
 ﻿// src/app/products/page.tsx
 import { Suspense } from 'react'
-import { api } from '@/lib/api'
 import ProductsPageContent from './ProductsPageContent'
 import { ProductCardSkeleton } from '@/components/common/LoadingSkeleton'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
-async function fetchAllProducts() {
-  const allProducts: any[] = []
-  let currentPage = 1
-  let hasMore = true
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://khaizan-backend.onrender.com/api'
 
-  while (hasMore) {
-    const data = await api.getProducts({ page: currentPage, page_size: 15 } as any)
-    if (data && data.results && data.results.length > 0) {
-      allProducts.push(...data.results)
-      hasMore = data.next !== null
-      currentPage++
-    } else {
-      hasMore = false
-    }
+async function fetchProducts() {
+  try {
+    const res = await fetch(`${API_URL}/products/?page_size=100`, {
+      next: { revalidate: 60 },
+    })
+    if (!res.ok) return { results: [], count: 0 }
+    return res.json()
+  } catch {
+    return { results: [], count: 0 }
   }
-
-  return allProducts
 }
 
-// ⭐ searchParams must be typed as a Promise in Next.js 15+
-// OR as a plain object in Next.js 13/14
-// This handles BOTH versions safely
+async function fetchCategories() {
+  try {
+    const res = await fetch(`${API_URL}/categories/`, {
+      next: { revalidate: 60 },
+    })
+    if (!res.ok) return []
+    const data = await res.json()
+    return Array.isArray(data) ? data : data.results || []
+  } catch {
+    return []
+  }
+}
+
+// ⭐ This component does the async fetching
+async function ProductsData({
+  productType,
+  category,
+  search,
+}: {
+  productType?: string | null
+  category?: string | null
+  search?: string | null
+}) {
+  const [productsData, categories] = await Promise.all([
+    fetchProducts(),
+    fetchCategories(),
+  ])
+
+  const allProducts = productsData?.results || []
+  const totalCount = productsData?.count || allProducts.length
+
+  return (
+    <ProductsPageContent
+      initialProducts={allProducts}
+      initialCategories={categories}
+      totalCount={totalCount}
+      initialProductType={productType || null}
+      initialCategory={category || null}
+      initialSearch={search || null}
+    />
+  )
+}
+
 export default async function ProductsPage({
   searchParams,
 }: {
   searchParams: Promise<{ product_type?: string; category?: string; search?: string }> | { product_type?: string; category?: string; search?: string }
 }) {
-  // ⭐ Await searchParams (required in Next.js 15+)
   const resolvedParams = await Promise.resolve(searchParams)
 
-  console.log('🔍 URL Params received:', resolvedParams)
-
-  const [allProducts, categoriesData] = await Promise.all([
-    fetchAllProducts(),
-    api.getCategories(),
-  ])
-
-  const categories = Array.isArray(categoriesData) ? categoriesData : []
-
-  console.log('🎯 product_type from URL:', resolvedParams?.product_type)
-
   return (
+    // ⭐ Suspense shows skeleton INSTANTLY while data loads in background
     <Suspense fallback={<ProductsPageFallback />}>
-      <ProductsPageContent
-        initialProducts={allProducts}
-        initialCategories={categories}
-        totalCount={allProducts.length}
-        initialProductType={resolvedParams?.product_type || null}
-        initialCategory={resolvedParams?.category || null}
-        initialSearch={resolvedParams?.search || null}
+      <ProductsData
+        productType={resolvedParams?.product_type}
+        category={resolvedParams?.category}
+        search={resolvedParams?.search}
       />
     </Suspense>
   )
@@ -63,26 +83,25 @@ export default async function ProductsPage({
 
 function ProductsPageFallback() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <div className="h-12 bg-gradient-to-r from-gray-200 to-gray-300 rounded-xl w-64 mb-3 animate-pulse" />
-          <div className="h-6 bg-gray-200 rounded-lg w-96 animate-pulse" />
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-3 sm:px-4 py-5">
+        {/* Header skeleton */}
+        <div className="mb-5">
+          <div className="h-7 bg-gray-200 rounded-lg w-40 mb-2 animate-pulse" />
+          <div className="h-4 bg-gray-100 rounded w-32 animate-pulse" />
         </div>
-        <div className="flex gap-8">
-          <aside className="hidden md:block w-80 shrink-0">
-            <div className="sticky top-24 bg-white rounded-2xl shadow-xl border border-gray-200 p-6 space-y-6">
-              <div className="h-10 bg-gray-200 rounded-xl animate-pulse" />
-              <div className="space-y-3">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="h-12 bg-gray-100 rounded-lg animate-pulse" />
-                ))}
-              </div>
-              <div className="h-32 bg-gray-100 rounded-xl animate-pulse" />
+        <div className="flex gap-4">
+          {/* Sidebar skeleton */}
+          <aside className="hidden md:block w-56 shrink-0">
+            <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="h-7 bg-gray-100 rounded-lg animate-pulse" />
+              ))}
             </div>
           </aside>
+          {/* Grid skeleton */}
           <main className="flex-1">
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
               {Array.from({ length: 8 }).map((_, i) => (
                 <ProductCardSkeleton key={i} />
               ))}

@@ -1,4 +1,3 @@
-// src/app/products/ProductsPageContent.tsx
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
@@ -38,7 +37,6 @@ interface ProductsPageContentProps {
   initialProducts: Product[]
   initialCategories: Category[]
   totalCount: number
-  // ⭐ ADDED: 3 new optional props from URL
   initialProductType?: string | null
   initialCategory?: string | null
   initialSearch?: string | null
@@ -48,94 +46,49 @@ export default function ProductsPageContent({
   initialProducts,
   initialCategories,
   totalCount,
-  // ⭐ ADDED: Destructure new props
   initialProductType,
   initialCategory,
   initialSearch,
 }: ProductsPageContentProps) {
-  // Filter states
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
-    initialCategory ? [initialCategory] : []  // ⭐ CHANGED: Pre-set from URL
+    initialCategory ? [initialCategory] : []
   )
   const [selectedProductTypes, setSelectedProductTypes] = useState<string[]>(
-    initialProductType ? [initialProductType] : []  // ⭐ CHANGED: Pre-set from URL
+    initialProductType ? [initialProductType] : []
   )
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000])
-  const [searchQuery, setSearchQuery] = useState(initialSearch || '')  // ⭐ CHANGED: Pre-set from URL
+  const [searchQuery, setSearchQuery] = useState(initialSearch || '')
 
-  // Calculate max price from products
   const maxPrice = useMemo(() => {
     const prices = initialProducts.map((p) => parseFloat(p.price))
     return Math.ceil(Math.max(...prices, 10000))
   }, [initialProducts])
 
-  // Set initial price range
   useEffect(() => {
     setPriceRange([0, maxPrice])
   }, [maxPrice])
 
-  // Product types with counts
-  const productTypes = useMemo(
-    () => [
-      {
-        value: 'new',
-        label: '🆕 New',
-        count: initialProducts.filter((p) => p.product_type === 'new').length,
-      },
-      {
-        value: 'refurbished',
-        label: '🔧 Refurbished',
-        count: initialProducts.filter((p) => p.product_type === 'refurbished').length,
-      },
-      {
-        value: 'rental',
-        label: '📅 Rental',
-        count: initialProducts.filter((p) => p.product_type === 'rental').length,
-      },
-    ],
-    [initialProducts]
-  )
+  const productTypes = useMemo(() => [
+    { value: 'new', label: '🆕 New', count: initialProducts.filter((p) => p.product_type === 'new').length },
+    { value: 'refurbished', label: '🔧 Refurbished', count: initialProducts.filter((p) => p.product_type === 'refurbished').length },
+    { value: 'rental', label: '📅 Rental', count: initialProducts.filter((p) => p.product_type === 'rental').length },
+  ], [initialProducts])
 
-  // Filter products
   const filteredProducts = useMemo(() => {
     return initialProducts.filter((product) => {
-      // Category filter
-      if (
-        selectedCategories.length > 0 &&
-        !selectedCategories.includes(product.category_id.toString())
-      ) {
-        return false
-      }
-
-      // Product type filter
-      if (
-        selectedProductTypes.length > 0 &&
-        !selectedProductTypes.includes(product.product_type)
-      ) {
-        return false
-      }
-
-      // Price filter
+      if (selectedCategories.length > 0 && !selectedCategories.includes(product.category_id.toString())) return false
+      if (selectedProductTypes.length > 0 && !selectedProductTypes.includes(product.product_type)) return false
       const price = parseFloat(product.price)
-      if (price < priceRange[0] || price > priceRange[1]) {
-        return false
-      }
-
-      // Search filter
+      if (price < priceRange[0] || price > priceRange[1]) return false
       if (searchQuery) {
         const query = searchQuery.toLowerCase()
-        const searchableText =
-          `${product.name} ${product.brand} ${product.category_name || product.category}`.toLowerCase()
-        if (!searchableText.includes(query)) {
-          return false
-        }
+        const searchableText = `${product.name} ${product.brand} ${product.category_name || product.category}`.toLowerCase()
+        if (!searchableText.includes(query)) return false
       }
-
       return true
     })
   }, [initialProducts, selectedCategories, selectedProductTypes, priceRange, searchQuery])
 
-  // Handlers
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategories((prev) =>
       prev.includes(categoryId) ? prev.filter((id) => id !== categoryId) : [...prev, categoryId]
@@ -148,14 +101,6 @@ export default function ProductsPageContent({
     )
   }
 
-  const handlePriceChange = (range: [number, number]) => {
-    setPriceRange(range)
-  }
-
-  const handleSearchChange = (query: string) => {
-    setSearchQuery(query)
-  }
-
   const handleClearFilters = () => {
     setSelectedCategories([])
     setSelectedProductTypes([])
@@ -164,22 +109,25 @@ export default function ProductsPageContent({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-3 sm:px-4 py-5 sm:py-6">
+
+        {/* ── Header ── */}
+        <div className="mb-5">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
             Our Products
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-sm text-gray-500">
             Showing{' '}
-            <span className="font-bold text-blue-600">{filteredProducts.length}</span> of{' '}
-            <span className="font-semibold text-gray-900">{totalCount}</span> products
+            <span className="font-semibold text-blue-600">{filteredProducts.length}</span>
+            {' '}of{' '}
+            <span className="font-semibold text-gray-700">{totalCount}</span> products
           </p>
         </div>
 
-        {/* Main Content */}
-        <div className="flex gap-8">
+        {/* ── Main Layout ── */}
+        <div className="flex gap-4 sm:gap-6">
+
           {/* Filters Sidebar */}
           <ProductFilters
             categories={initialCategories.map((cat) => ({
@@ -192,8 +140,8 @@ export default function ProductsPageContent({
             maxPrice={maxPrice}
             searchQuery={searchQuery}
             onCategoryChange={handleCategoryChange}
-            onPriceChange={handlePriceChange}
-            onSearchChange={handleSearchChange}
+            onPriceChange={setPriceRange}
+            onSearchChange={setSearchQuery}
             onApplyFilters={() => {}}
             onClearFilters={handleClearFilters}
             productTypes={productTypes}
@@ -201,45 +149,34 @@ export default function ProductsPageContent({
             onProductTypeChange={handleProductTypeChange}
           />
 
-          {/* Products Grid */}
-          <main className="flex-1">
+          {/* ── Products Grid ── */}
+          <main className="flex-1 min-w-0">
             {filteredProducts.length === 0 ? (
-              <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-12 text-center">
-                <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full mx-auto mb-6 flex items-center justify-center">
-                  <svg
-                    className="w-12 h-12 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
+              <div className="bg-white rounded-xl border border-gray-100 p-10 text-center">
+                <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">No products found</h3>
-                <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                  We couldn't find any products matching your filters. Try adjusting your search
-                  criteria.
-                </p>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">No products found</h3>
+                <p className="text-sm text-gray-500 mb-6">Try adjusting your filters or search.</p>
                 <button
                   onClick={handleClearFilters}
-                  className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  className="px-6 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
                 >
-                  Clear All Filters
+                  Clear Filters
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3 lg:gap-4">
                 {filteredProducts.map((product) => (
                   <ProductCard key={`product-${product.id}-${product.slug}`} product={product} />
                 ))}
               </div>
             )}
           </main>
+
         </div>
       </div>
     </div>

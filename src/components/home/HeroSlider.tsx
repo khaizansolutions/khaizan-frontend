@@ -9,44 +9,46 @@ export default function HeroSlider() {
     {
       title: 'Quality Office Supplies',
       subtitle: 'Everything you need for your office',
-      image: 'bg-gradient-to-r from-blue-600 to-blue-800',
+      bg: 'from-blue-600 to-blue-800',
     },
     {
       title: 'Fast Delivery',
       subtitle: 'Free delivery on orders over AED 300',
-      image: 'bg-gradient-to-r from-amber-600 to-orange-800',
+      bg: 'from-amber-500 to-orange-700',
     },
     {
       title: 'Best Prices',
       subtitle: 'Competitive prices guaranteed',
-      image: 'bg-gradient-to-r from-green-600 to-teal-800',
+      bg: 'from-green-600 to-teal-700',
     },
   ]
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length)
-    }, 5000)
+    const timer = setInterval(() => setCurrentSlide((prev) => (prev + 1) % slides.length), 5000)
     return () => clearInterval(timer)
   }, [])
 
-  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length)
-  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)
+  const next = () => setCurrentSlide((prev) => (prev + 1) % slides.length)
+  const prev = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)
 
   return (
-    <div className="relative h-[400px] md:h-[500px] overflow-hidden">
+    <div className="relative h-[200px] sm:h-[260px] md:h-[300px] overflow-hidden rounded-xl mx-3 sm:mx-4 mt-3">
       {slides.map((slide, index) => (
         <div
           key={index}
-          className={`absolute inset-0 transition-opacity duration-1000 ${
+          className={`absolute inset-0 bg-gradient-to-r ${slide.bg} transition-opacity duration-700 ${
             index === currentSlide ? 'opacity-100' : 'opacity-0'
-          } ${slide.image}`}
+          }`}
         >
-          <div className="container mx-auto px-4 h-full flex items-center">
-            <div className="text-white max-w-2xl">
-              <h1 className="text-4xl md:text-6xl font-bold mb-4">{slide.title}</h1>
-              <p className="text-xl md:text-2xl mb-8">{slide.subtitle}</p>
-              <button className="bg-secondary text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-amber-600 transition">
+          <div className="h-full flex items-center px-8 sm:px-12">
+            <div className="text-white">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1.5 leading-tight">
+                {slide.title}
+              </h1>
+              <p className="text-sm sm:text-base text-white/80 mb-4">
+                {slide.subtitle}
+              </p>
+              <button className="bg-white text-gray-900 px-5 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 active:scale-[0.97] transition-all">
                 Shop Now
               </button>
             </div>
@@ -54,28 +56,28 @@ export default function HeroSlider() {
         </div>
       ))}
 
-      {/* Navigation Arrows */}
+      {/* Arrows */}
       <button
-        onClick={prevSlide}
-        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full hover:bg-white"
+        onClick={prev}
+        className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-1.5 rounded-full transition-colors"
       >
-        <ChevronLeft size={24} />
+        <ChevronLeft size={16} />
       </button>
       <button
-        onClick={nextSlide}
-        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full hover:bg-white"
+        onClick={next}
+        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-1.5 rounded-full transition-colors"
       >
-        <ChevronRight size={24} />
+        <ChevronRight size={16} />
       </button>
 
       {/* Dots */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
         {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
-            className={`w-3 h-3 rounded-full ${
-              index === currentSlide ? 'bg-white' : 'bg-white/50'
+            className={`rounded-full transition-all duration-300 ${
+              index === currentSlide ? 'bg-white w-4 h-1.5' : 'bg-white/50 w-1.5 h-1.5'
             }`}
           />
         ))}
