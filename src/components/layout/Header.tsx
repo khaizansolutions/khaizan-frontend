@@ -8,19 +8,19 @@ export default function Header() {
         {/* Contact Info */}
         <div className="flex items-center gap-3 md:gap-6">
           <a
-            href="tel:+971544706523"
+            href="tel:+971507262269"
             className="flex items-center gap-1 md:gap-2 hover:text-secondary transition"
           >
             <Phone size={14} className="md:w-4 md:h-4" />
-            <span className="hidden sm:inline">+971 544 706 523</span>
+            <span className="hidden sm:inline">+971 50 726 2269</span>
             <span className="sm:hidden">Call</span>
           </a>
           <a
-            href="mailto:khaizanstoragesolutions@gmail.com"
+            href="mailto:khaizanstoragesolution@gmail.com"
             className="flex items-center gap-1 md:gap-2 hover:text-secondary transition"
           >
             <Mail size={14} className="md:w-4 md:h-4" />
-            <span className="hidden lg:inline">khaizanstoragesolutions@gmail.com</span>
+            <span className="hidden lg:inline">khaizanstoragesolution@gmail.com</span>
             <span className="lg:hidden hidden sm:inline">Email</span>
           </a>
         </div>

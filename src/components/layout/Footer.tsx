@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-xl font-bold mb-4 text-secondary">OfficeSupplies</h3>
+            <h3 className="text-xl font-bold mb-4 text-secondary">KhaizanSolutions</h3>
             <p className="text-gray-400 mb-4">
               Your trusted partner for all office supplies needs. Quality products at affordable prices.
             </p>
@@ -46,16 +46,23 @@ export default function Footer() {
           <div>
             <h4 className="font-bold mb-4">Contact Info</h4>
             <ul className="space-y-2 text-gray-400">
-              <li>123 Business Street</li>
               <li>Dubai, UAE</li>
-              <li>Phone: +971 4 452 2261</li>
-              <li>Email: info@officesupplies.com</li>
+              <li>
+                <a href="tel:+971507262269" className="hover:text-white transition">
+                  Phone: +971 50 726 2269
+                </a>
+              </li>
+              <li>
+                <a href="mailto:khaizanstoragesolution@gmail.com" className="hover:text-white transition">
+                  khaizanstoragesolution@gmail.com
+                </a>
+              </li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; 2024 Office Supplies Store. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} KhaizanSolutions. All rights reserved.</p>
         </div>
       </div>
     </footer>
