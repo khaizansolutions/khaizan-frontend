@@ -1,6 +1,5 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Grid3X3 } from 'lucide-react'
 
@@ -25,23 +24,16 @@ const COLORS = [
   { bg: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-100 hover:border-orange-300' },
 ]
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://khaizan-backend.onrender.com/api'
+interface CategoryGridProps {
+  initialCategories?: Category[]
+}
 
-export default function CategoryGrid() {
-  const [categories, setCategories] = useState<Category[]>([])
-  const [loading, setLoading] = useState(true)
+// ✅ PERF FIX: No more useEffect/fetch — data comes from server via props
+// Instant render, no loading spinner, better SEO (content in HTML)
+export default function CategoryGrid({ initialCategories = [] }: CategoryGridProps) {
+  const displayCategories = initialCategories.slice(0, 4)
 
-  useEffect(() => {
-    fetch(`${API_URL}/categories/?navbar=true`, { next: { revalidate: 60 } } as any)
-      .then((r) => r.json())
-      .then((data) => setCategories(data.results || data))
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }, [])
-
-  const displayCategories = categories.slice(0, 4)
-
-  if (loading) {
+  if (initialCategories.length === 0) {
     return (
       <section className="px-3 sm:px-4 py-4">
         <div className="h-4 w-32 bg-gray-200 rounded mb-3 animate-pulse" />
@@ -67,7 +59,7 @@ export default function CategoryGrid() {
               href={`/products?category=${category.slug}`}
               className={`group ${color.bg} border ${color.border} rounded-xl p-3 hover:shadow-sm transition-all duration-200`}
             >
-              <h3 className={`font-semibold text-xs sm:text-sm text-gray-800 line-clamp-1 mb-0.5`}>
+              <h3 className="font-semibold text-xs sm:text-sm text-gray-800 line-clamp-1 mb-0.5">
                 {category.name}
               </h3>
               {category.subcategories?.length > 0 && (
@@ -83,13 +75,13 @@ export default function CategoryGrid() {
         })}
       </div>
 
-      {categories.length > 4 && (
+      {initialCategories.length > 4 && (
         <Link
           href="/products"
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-600 hover:text-gray-900 transition-colors"
         >
           <Grid3X3 size={13} />
-          View all {categories.length} categories
+          View all {initialCategories.length} categories
           <ArrowRight size={11} />
         </Link>
       )}

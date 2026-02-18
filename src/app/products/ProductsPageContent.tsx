@@ -30,6 +30,7 @@ interface Product {
 interface Category {
   id: number
   name: string
+  slug?: string
   product_count: number
 }
 
@@ -50,14 +51,46 @@ export default function ProductsPageContent({
   initialCategory,
   initialSearch,
 }: ProductsPageContentProps) {
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(
-    initialCategory ? [initialCategory] : []
-  )
+
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [selectedProductTypes, setSelectedProductTypes] = useState<string[]>(
     initialProductType ? [initialProductType] : []
   )
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000])
   const [searchQuery, setSearchQuery] = useState(initialSearch || '')
+
+  useEffect(() => {
+    if (!initialCategory || !initialCategories.length) return
+
+    const bySlug = initialCategories.find((c) => c.slug === initialCategory)
+    if (bySlug) { setSelectedCategories([bySlug.id.toString()]); return }
+
+    const byName = initialCategories.find(
+      (c) => c.name.toLowerCase().replace(/\s+/g, '-') === initialCategory.toLowerCase()
+    )
+    if (byName) { setSelectedCategories([byName.id.toString()]); return }
+
+    const matchingProduct = initialProducts.find(
+      (p) => (p.category || '').toLowerCase().replace(/\s+/g, '-') === initialCategory.toLowerCase()
+    )
+    if (matchingProduct?.category_id) {
+      setSelectedCategories([matchingProduct.category_id.toString()])
+    }
+  }, [initialCategory, initialCategories, initialProducts])
+
+  // ✅ DEBUG: Remove after fixing
+  useEffect(() => {
+    console.log('=== FILTER DEBUG ===')
+    console.log('initialCategory:', initialCategory)
+    console.log('initialCategories:', JSON.stringify(initialCategories.slice(0, 3)))
+    console.log('selectedCategories:', selectedCategories)
+    console.log('product sample:', JSON.stringify(initialProducts.slice(0, 2).map(p => ({
+      id: p.id,
+      category_id: p.category_id,
+      category: p.category,
+      category_name: p.category_name
+    }))))
+  }, [selectedCategories])
 
   const maxPrice = useMemo(() => {
     const prices = initialProducts.map((p) => parseFloat(p.price))
@@ -69,14 +102,14 @@ export default function ProductsPageContent({
   }, [maxPrice])
 
   const productTypes = useMemo(() => [
-    { value: 'new', label: '🆕 New', count: initialProducts.filter((p) => p.product_type === 'new').length },
-    { value: 'refurbished', label: '🔧 Refurbished', count: initialProducts.filter((p) => p.product_type === 'refurbished').length },
-    { value: 'rental', label: '📅 Rental', count: initialProducts.filter((p) => p.product_type === 'rental').length },
+    { value: 'new', label: 'New', count: initialProducts.filter((p) => p.product_type === 'new').length },
+    { value: 'refurbished', label: 'Refurbished', count: initialProducts.filter((p) => p.product_type === 'refurbished').length },
+    { value: 'rental', label: 'Rental', count: initialProducts.filter((p) => p.product_type === 'rental').length },
   ], [initialProducts])
 
   const filteredProducts = useMemo(() => {
     return initialProducts.filter((product) => {
-      if (selectedCategories.length > 0 && !selectedCategories.includes(product.category_id.toString())) return false
+      if (selectedCategories.length > 0 && !selectedCategories.includes(product.category_id?.toString())) return false
       if (selectedProductTypes.length > 0 && !selectedProductTypes.includes(product.product_type)) return false
       const price = parseFloat(product.price)
       if (price < priceRange[0] || price > priceRange[1]) return false
@@ -111,12 +144,8 @@ export default function ProductsPageContent({
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-3 sm:px-4 py-5 sm:py-6">
-
-        {/* ── Header ── */}
         <div className="mb-5">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
-            Our Products
-          </h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Our Products</h1>
           <p className="text-sm text-gray-500">
             Showing{' '}
             <span className="font-semibold text-blue-600">{filteredProducts.length}</span>
@@ -125,10 +154,7 @@ export default function ProductsPageContent({
           </p>
         </div>
 
-        {/* ── Main Layout ── */}
         <div className="flex gap-4 sm:gap-6">
-
-          {/* Filters Sidebar */}
           <ProductFilters
             categories={initialCategories.map((cat) => ({
               id: cat.id,
@@ -149,7 +175,6 @@ export default function ProductsPageContent({
             onProductTypeChange={handleProductTypeChange}
           />
 
-          {/* ── Products Grid ── */}
           <main className="flex-1 min-w-0">
             {filteredProducts.length === 0 ? (
               <div className="bg-white rounded-xl border border-gray-100 p-10 text-center">
@@ -176,7 +201,6 @@ export default function ProductsPageContent({
               </div>
             )}
           </main>
-
         </div>
       </div>
     </div>

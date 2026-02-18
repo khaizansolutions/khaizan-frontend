@@ -8,7 +8,6 @@ export const revalidate = 60
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://khaizan-backend.onrender.com/api'
 
-// ✅ SEO FIX: Dynamic metadata based on filters
 export async function generateMetadata({
   searchParams,
 }: {
@@ -21,39 +20,38 @@ export async function generateMetadata({
 
   if (params?.product_type === 'new') {
     title = 'New Office Supplies & Equipment Dubai'
-    description = 'Shop brand new office supplies, furniture and equipment in Dubai, UAE. Quality products at competitive prices.'
+    description = 'Shop brand new office supplies, furniture and equipment in Dubai, UAE.'
   } else if (params?.product_type === 'refurbished') {
     title = 'Refurbished Office Equipment Dubai – Quality at Great Prices'
-    description = 'Buy refurbished office furniture and equipment in Dubai, UAE. Save money without compromising on quality.'
+    description = 'Buy refurbished office furniture and equipment in Dubai, UAE.'
   } else if (params?.product_type === 'rental') {
     title = 'Office Equipment Rental Dubai – Flexible Rental Plans'
-    description = 'Rent office equipment and furniture in Dubai, UAE. Flexible rental plans for businesses of all sizes.'
+    description = 'Rent office equipment and furniture in Dubai, UAE.'
   } else if (params?.category) {
     title = `${params.category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} – Office Supplies Dubai`
-    description = `Shop ${params.category.replace(/-/g, ' ')} in Dubai, UAE at Khaizan Solutions. Competitive prices and fast delivery.`
+    description = `Shop ${params.category.replace(/-/g, ' ')} in Dubai, UAE at Khaizan Solutions.`
   } else if (params?.search) {
     title = `Search results for "${params.search}" – Khaizan Solutions`
-    description = `Find ${params.search} at Khaizan Solutions Dubai. Office supplies, furniture and equipment in UAE.`
+    description = `Find ${params.search} at Khaizan Solutions Dubai.`
   }
 
   return {
     title,
     description,
-    alternates: {
-      canonical: '/products',
-    },
+    alternates: { canonical: '/products' },
     openGraph: {
       title,
       description,
-      url: 'https://www.khaizan.com/products',
+      url: 'https://www.khaizansolution.com/products',
       images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
     },
   }
 }
 
+// ✅ FIX 1: page_size=1000 — fetch ALL products, not just first 100
 async function fetchProducts() {
   try {
-    const res = await fetch(`${API_URL}/products/?page_size=100`, {
+    const res = await fetch(`${API_URL}/products/?page_size=1000`, {
       next: { revalidate: 60 },
     })
     if (!res.ok) return { results: [], count: 0 }
@@ -63,10 +61,12 @@ async function fetchProducts() {
   }
 }
 
+// ✅ FIX 2: Fetch ALL categories (no navbar=true filter)
+// So office-machines, furniture etc are included for filter matching
 async function fetchCategories() {
   try {
     const res = await fetch(`${API_URL}/categories/`, {
-      next: { revalidate: 60 },
+      next: { revalidate: 1800 },
     })
     if (!res.ok) return []
     const data = await res.json()
