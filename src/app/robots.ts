@@ -6,27 +6,14 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: [
-          '/api/',
-          '/quote/',      // no need to index cart/quote page
-          '/_next/',
-          '/admin/',
-        ],
+        disallow: ['/api/', '/quote/', '/_next/', '/admin/'],
       },
       {
-        // Block AI scrapers from training on your content
-        userAgent: [
-          'GPTBot',
-          'ChatGPT-User',
-          'Google-Extended',
-          'CCBot',
-          'anthropic-ai',
-          'Claude-Web',
-        ],
+        userAgent: ['GPTBot', 'ChatGPT-User', 'Google-Extended', 'CCBot', 'anthropic-ai', 'Claude-Web'],
         disallow: '/',
       },
     ],
-    sitemap: 'https://www.khaizan.com/sitemap.xml',
-    host: 'https://www.khaizan.com',
+    sitemap: 'https://www.khaizansolution.com/sitemap.xml',
+    host: 'https://www.khaizansolution.com',
   }
 }

@@ -32,7 +32,7 @@ async function getNavCategories() {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.khaizan.com'),
+  metadataBase: new URL('https://www.khaizansolution.com'),
   title: {
     default: 'Khaizan Solutions – Office Supplies, Furniture & Equipment Dubai',
     template: '%s | Khaizan Solutions',
@@ -48,7 +48,6 @@ export const metadata: Metadata = {
     'Khaizan Solutions',
     'office supplies UAE',
   ],
-  // ✅ SEO FIX: Google Search Console verification
   verification: {
     google: 'aBk4_ofvvAy13uytHfSFycsm8S2slCnYk33hSdhHTXs',
   },
@@ -67,7 +66,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_AE',
-    url: 'https://www.khaizan.com',
+    url: 'https://www.khaizansolution.com',
     siteName: 'Khaizan Solutions',
     title: 'Khaizan Solutions – Office Supplies, Furniture & Equipment Dubai',
     description:

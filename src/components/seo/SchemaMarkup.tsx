@@ -4,19 +4,19 @@ export default function SchemaMarkup() {
   const localBusiness = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
-    '@id': 'https://www.khaizan.com/#business',
+    '@id': 'https://www.khaizansolution.com/#business',
     name: 'Khaizan Solutions',
     alternateName: 'KhaizanSolutions',
     description:
       'Khaizan Solutions is Dubai\'s trusted supplier of new, refurbished, and rental office supplies, furniture, and equipment. Serving businesses across UAE with competitive prices and fast delivery.',
-    url: 'https://www.khaizan.com',
+    url: 'https://www.khaizansolution.com',
     logo: {
       '@type': 'ImageObject',
-      url: 'https://www.khaizan.com/logo.png',
+      url: 'https://www.khaizansolution.com/logo.png',
       width: 200,
       height: 60,
     },
-    image: 'https://www.khaizan.com/og-image.jpg',
+    image: 'https://www.khaizansolution.com/og-image.jpg',
     telephone: '+971507262269',
     email: 'khaizanstoragesolution@gmail.com',
     address: {
@@ -73,18 +73,18 @@ export default function SchemaMarkup() {
   const website = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    '@id': 'https://www.khaizan.com/#website',
+    '@id': 'https://www.khaizansolution.com/#website',
     name: 'Khaizan Solutions',
-    url: 'https://www.khaizan.com',
+    url: 'https://www.khaizansolution.com',
     description: 'Office supplies, furniture & equipment in Dubai, UAE',
     publisher: {
-      '@id': 'https://www.khaizan.com/#business',
+      '@id': 'https://www.khaizansolution.com/#business',
     },
     potentialAction: {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: 'https://www.khaizan.com/products?search={search_term_string}',
+        urlTemplate: 'https://www.khaizansolution.com/products?search={search_term_string}',
       },
       'query-input': 'required name=search_term_string',
     },
@@ -93,10 +93,10 @@ export default function SchemaMarkup() {
   const organization = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    '@id': 'https://www.khaizan.com/#organization',
+    '@id': 'https://www.khaizansolution.com/#organization',
     name: 'Khaizan Solutions',
-    url: 'https://www.khaizan.com',
-    logo: 'https://www.khaizan.com/logo.png',
+    url: 'https://www.khaizansolution.com',
+    logo: 'https://www.khaizansolution.com/logo.png',
     contactPoint: {
       '@type': 'ContactPoint',
       telephone: '+971507262269',
