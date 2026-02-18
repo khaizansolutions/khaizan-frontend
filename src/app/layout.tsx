@@ -6,6 +6,7 @@ import Footer from '@/components/layout/Footer'
 import { QuoteProvider } from '@/context/QuoteContext'
 import WakeBackend from '@/components/common/WakeBackend'
 import SchemaMarkup from '@/components/seo/SchemaMarkup'
+import GoogleAnalytics from '@/components/seo/GoogleAnalytics'
 import type { Metadata } from 'next'
 
 const inter = Inter({
@@ -95,6 +96,9 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className={inter.className}>
+        {/* ✅ Google Analytics GA4 — lazyOnload, never blocks render */}
+        <GoogleAnalytics />
+        {/* ✅ Schema Markup — LocalBusiness + WebSite + Organization */}
         <SchemaMarkup />
         <QuoteProvider>
           <WakeBackend />
