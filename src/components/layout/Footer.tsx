@@ -5,7 +5,7 @@ export default function Footer() {
   return (
     <footer className="bg-gray-900 text-white mt-16">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Company Info */}
           <div>
             <h3 className="text-xl font-bold mb-4 text-secondary">KhaizanSolutions</h3>
@@ -13,10 +13,10 @@ export default function Footer() {
               Your trusted partner for all office supplies needs. Quality products at affordable prices.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="hover:text-secondary"><Facebook size={20} /></a>
-              <a href="#" className="hover:text-secondary"><Twitter size={20} /></a>
-              <a href="#" className="hover:text-secondary"><Instagram size={20} /></a>
-              <a href="#" className="hover:text-secondary"><Linkedin size={20} /></a>
+              <a href="#" className="hover:text-secondary" aria-label="Follow us on Facebook"><Facebook size={20} /></a>
+              <a href="#" className="hover:text-secondary" aria-label="Follow us on Twitter"><Twitter size={20} /></a>
+              <a href="#" className="hover:text-secondary" aria-label="Follow us on Instagram"><Instagram size={20} /></a>
+              <a href="#" className="hover:text-secondary" aria-label="Follow us on LinkedIn"><Linkedin size={20} /></a>
             </div>
           </div>
 
@@ -31,33 +31,24 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Categories */}
-          <div>
-            <h4 className="font-bold mb-4">Categories</h4>
-            <ul className="space-y-2">
-              <li><Link href="/products" className="text-gray-400 hover:text-white">Office Supplies</Link></li>
-              <li><Link href="/products" className="text-gray-400 hover:text-white">Paper Products</Link></li>
-              <li><Link href="/products" className="text-gray-400 hover:text-white">Ink & Toner</Link></li>
-              <li><Link href="/products" className="text-gray-400 hover:text-white">Technology</Link></li>
-            </ul>
-          </div>
-
           {/* Contact Info */}
           <div>
             <h4 className="font-bold mb-4">Contact Info</h4>
-            <ul className="space-y-2 text-gray-400">
-              <li>Dubai, UAE</li>
-              <li>
-                <a href="tel:+971507262269" className="hover:text-white transition">
-                  Phone: +971 50 726 2269
-                </a>
-              </li>
-              <li>
-                <a href="mailto:khaizanstoragesolution@gmail.com" className="hover:text-white transition">
-                  khaizanstoragesolution@gmail.com
-                </a>
-              </li>
-            </ul>
+            <address className="not-italic">
+              <ul className="space-y-2 text-gray-400">
+                <li>Dubai, UAE</li>
+                <li>
+                  <a href="tel:+971507262269" className="hover:text-white transition">
+                    Phone: +971 50 726 2269
+                  </a>
+                </li>
+                <li>
+                  <a href="mailto:khaizanstoragesolution@gmail.com" className="hover:text-white transition">
+                    khaizanstoragesolution@gmail.com
+                  </a>
+                </li>
+              </ul>
+            </address>
           </div>
         </div>
 

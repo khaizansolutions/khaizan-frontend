@@ -42,9 +42,16 @@ export default function HeroSlider() {
         >
           <div className="h-full flex items-center px-8 sm:px-12">
             <div className="text-white">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1.5 leading-tight">
-                {slide.title}
-              </h1>
+              {/* ✅ SEO FIX: Only active slide renders h1, inactive slides use div */}
+              {index === currentSlide ? (
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1.5 leading-tight">
+                  {slide.title}
+                </h1>
+              ) : (
+                <div className="text-xl sm:text-2xl md:text-3xl font-bold mb-1.5 leading-tight" aria-hidden="true">
+                  {slide.title}
+                </div>
+              )}
               <p className="text-sm sm:text-base text-white/80 mb-4">
                 {slide.subtitle}
               </p>
@@ -59,12 +66,14 @@ export default function HeroSlider() {
       {/* Arrows */}
       <button
         onClick={prev}
+        aria-label="Previous slide"
         className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-1.5 rounded-full transition-colors"
       >
         <ChevronLeft size={16} />
       </button>
       <button
         onClick={next}
+        aria-label="Next slide"
         className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-1.5 rounded-full transition-colors"
       >
         <ChevronRight size={16} />
@@ -76,6 +85,7 @@ export default function HeroSlider() {
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
+            aria-label={`Go to slide ${index + 1}`}
             className={`rounded-full transition-all duration-300 ${
               index === currentSlide ? 'bg-white w-4 h-1.5' : 'bg-white/50 w-1.5 h-1.5'
             }`}

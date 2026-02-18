@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { ShoppingCart, MessageCircle, Plus, Minus, Package } from 'lucide-react'
 import { useQuote } from '@/context/QuoteContext'
 
@@ -47,11 +48,13 @@ export default function ProductCard({ product }: { product: any }) {
       <Link href={productUrl} className="block flex-shrink-0">
         <div className="relative w-full h-32 sm:h-36 bg-gray-50 overflow-hidden">
           {imageUrl ? (
-            <img
+            // ✅ SEO FIX: Next.js Image — auto WebP, lazy load, size optimization
+            <Image
               src={imageUrl}
               alt={product.name}
-              className="w-full h-full object-contain p-2 group-hover:scale-[1.03] transition-transform duration-300"
-              loading="lazy"
+              fill
+              sizes="(max-width: 640px) 45vw, (max-width: 768px) 30vw, 23vw"
+              className="object-contain p-2 group-hover:scale-[1.03] transition-transform duration-300"
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center gap-1 bg-gray-50">
@@ -136,19 +139,20 @@ export default function ProductCard({ product }: { product: any }) {
             </button>
           ) : (
             <div className="flex-1 flex items-center justify-between bg-blue-600 text-white rounded-lg overflow-hidden">
-              <button onClick={(e) => handleQuantityChange(e, 'remove')} className="px-2 py-1.5 hover:bg-blue-700 transition-colors">
+              <button onClick={(e) => handleQuantityChange(e, 'remove')} className="px-2 py-1.5 hover:bg-blue-700 transition-colors" aria-label="Remove from quote">
                 <Minus size={11} />
               </button>
               <span className="font-bold text-[10px] tabular-nums">{quantity}</span>
-              <button onClick={(e) => handleQuantityChange(e, 'add')} className="px-2 py-1.5 hover:bg-blue-700 transition-colors">
+              <button onClick={(e) => handleQuantityChange(e, 'add')} className="px-2 py-1.5 hover:bg-blue-700 transition-colors" aria-label="Add to quote">
                 <Plus size={11} />
               </button>
             </div>
           )}
+          {/* ✅ SEO FIX: aria-label added to icon-only button */}
           <button
             onClick={handleWhatsApp}
             className="bg-green-500 text-white px-2 py-1.5 rounded-lg hover:bg-green-600 active:scale-[0.97] transition-all flex items-center justify-center"
-            title="WhatsApp"
+            aria-label={`Contact us on WhatsApp about ${product.name}`}
           >
             <MessageCircle size={11} />
           </button>

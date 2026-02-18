@@ -11,6 +11,16 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'images.unsplash.com',
       },
+      // ✅ SEO FIX: Added Cloudinary (product images)
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+      // ✅ SEO FIX: Added Render backend (fallback images)
+      {
+        protocol: 'https',
+        hostname: 'khaizan-backend.onrender.com',
+      },
     ],
   },
   output: 'standalone',
