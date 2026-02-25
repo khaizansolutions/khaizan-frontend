@@ -11,7 +11,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://khaizan-backend.onre
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<{ product_type?: string; category?: string; search?: string }> | { product_type?: string; category?: string; search?: string }
+  searchParams: Promise<{ product_type?: string; category?: string; subcategory?: string; search?: string }> | { product_type?: string; category?: string; subcategory?: string; search?: string }
 }): Promise<Metadata> {
   const params = await Promise.resolve(searchParams)
 
@@ -27,12 +27,15 @@ export async function generateMetadata({
   } else if (params?.product_type === 'rental') {
     title = 'Office Equipment Rental Dubai – Flexible Rental Plans'
     description = 'Rent office equipment and furniture in Dubai, UAE.'
+  } else if (params?.subcategory) {
+    title = `${params.subcategory.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} – Office Supplies Dubai`
+    description = `Shop ${params.subcategory.replace(/-/g, ' ')} in Dubai, UAE at KhaizanSolutions.`
   } else if (params?.category) {
     title = `${params.category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} – Office Supplies Dubai`
-    description = `Shop ${params.category.replace(/-/g, ' ')} in Dubai, UAE at Khaizan Solutions.`
+    description = `Shop ${params.category.replace(/-/g, ' ')} in Dubai, UAE at KhaizanSolutions.`
   } else if (params?.search) {
-    title = `Search results for "${params.search}" – Khaizan Solutions`
-    description = `Find ${params.search} at Khaizan Solutions Dubai.`
+    title = `Search results for "${params.search}" – KhaizanSolutions`
+    description = `Find ${params.search} at KhaizanSolutions Dubai.`
   }
 
   return {
@@ -48,10 +51,10 @@ export async function generateMetadata({
   }
 }
 
-// ✅ FIX 1: page_size=1000 — fetch ALL products, not just first 100
+// Fetch products with reasonable limit (not 1000 - that kills Render)
 async function fetchProducts() {
   try {
-    const res = await fetch(`${API_URL}/products/?page_size=1000`, {
+    const res = await fetch(`${API_URL}/products/?page_size=100`, {
       next: { revalidate: 60 },
     })
     if (!res.ok) return { results: [], count: 0 }
@@ -61,8 +64,7 @@ async function fetchProducts() {
   }
 }
 
-// ✅ FIX 2: Fetch ALL categories (no navbar=true filter)
-// So office-machines, furniture etc are included for filter matching
+// Fetch ALL categories including subcategories
 async function fetchCategories() {
   try {
     const res = await fetch(`${API_URL}/categories/`, {
@@ -79,10 +81,12 @@ async function fetchCategories() {
 async function ProductsData({
   productType,
   category,
+  subcategory,
   search,
 }: {
   productType?: string | null
   category?: string | null
+  subcategory?: string | null
   search?: string | null
 }) {
   const [productsData, categories] = await Promise.all([
@@ -100,6 +104,7 @@ async function ProductsData({
       totalCount={totalCount}
       initialProductType={productType || null}
       initialCategory={category || null}
+      initialSubcategory={subcategory || null}
       initialSearch={search || null}
     />
   )
@@ -108,7 +113,7 @@ async function ProductsData({
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ product_type?: string; category?: string; search?: string }> | { product_type?: string; category?: string; search?: string }
+  searchParams: Promise<{ product_type?: string; category?: string; subcategory?: string; search?: string }> | { product_type?: string; category?: string; subcategory?: string; search?: string }
 }) {
   const resolvedParams = await Promise.resolve(searchParams)
 
@@ -117,6 +122,7 @@ export default async function ProductsPage({
       <ProductsData
         productType={resolvedParams?.product_type}
         category={resolvedParams?.category}
+        subcategory={resolvedParams?.subcategory}
         search={resolvedParams?.search}
       />
     </Suspense>

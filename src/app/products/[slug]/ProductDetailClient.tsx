@@ -1,12 +1,6 @@
 'use client'
-// src/app/products/[slug]/ProductDetailClient.tsx
-// ✅ SEO FIX: Extracted from page.tsx so server wrapper can handle metadata + schema
-// - Accepts initialProduct from server (no loading flash for product data)
-// - Falls back to client fetch if needed
-
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { ShoppingCart, MessageCircle, Star, Truck, Shield, RefreshCcw, ArrowLeft, Package } from 'lucide-react'
 import { useQuote } from '@/context/QuoteContext'
 import { ProductDetailSkeleton } from '@/components/common/LoadingSkeleton'
@@ -28,7 +22,6 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
   const { addToQuote } = useQuote()
 
   useEffect(() => {
-    // Only fetch client-side if no initialProduct was passed
     if (initialProduct) return
     if (!slug) { setLoading(false); return }
     api.getProduct(slug)
@@ -44,7 +37,7 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
       <Package size={48} className="text-gray-300 mb-4" />
       <h1 className="text-xl font-bold text-gray-800 mb-2">Product Not Found</h1>
       <p className="text-sm text-gray-500 mb-6">This product doesn't exist or was removed.</p>
-      <Link href="/products" className="bg-blue-600 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-700 transition">
+      <Link href="/products" className="bg-secondary text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-800 transition">
         Browse Products
       </Link>
     </div>
@@ -79,9 +72,9 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
           <ArrowLeft size={18} className="text-gray-700" />
         </Link>
         <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-xs text-gray-500 overflow-hidden">
-          <Link href="/" className="hover:text-blue-600 shrink-0">Home</Link>
+          <Link href="/" className="hover:text-primary shrink-0">Home</Link>
           <span aria-hidden="true">/</span>
-          <Link href="/products" className="hover:text-blue-600 shrink-0">Products</Link>
+          <Link href="/products" className="hover:text-primary shrink-0">Products</Link>
           <span aria-hidden="true">/</span>
           <span className="text-gray-800 font-medium truncate">{product.name}</span>
         </nav>
@@ -94,14 +87,11 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
           <div>
             <div className="bg-white rounded-xl border border-gray-100 overflow-hidden aspect-square relative">
               {imageUrl ? (
-                // ✅ SEO FIX: Next.js Image with proper alt
-                <Image
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
                   src={imageUrl}
                   alt={product.name}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-contain p-4"
-                  priority
+                  className="w-full h-full object-contain p-4"
                 />
               ) : (
                 <div className="w-full h-full flex flex-col items-center justify-center gap-2">
@@ -110,7 +100,7 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
                 </div>
               )}
               {product.discount > 0 && (
-                <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                <span className="absolute top-3 left-3 bg-primary text-white text-xs font-bold px-2 py-1 rounded-full">
                   -{product.discount}%
                 </span>
               )}
@@ -127,14 +117,13 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
                       onClick={() => setActiveImage(url)}
                       aria-label={`View image ${i + 1} of ${product.name}`}
                       className={`flex-shrink-0 w-14 h-14 rounded-lg border-2 overflow-hidden transition ${
-                        activeImage === url ? 'border-blue-500' : 'border-gray-200'
+                        activeImage === url ? 'border-primary' : 'border-gray-200'
                       }`}
                     >
-                      <Image
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
                         src={url}
                         alt={`${product.name} view ${i + 1}`}
-                        width={56}
-                        height={56}
                         className="w-full h-full object-contain p-1"
                       />
                     </button>
@@ -167,7 +156,7 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
             </div>
 
             <div className="flex items-baseline gap-2 mb-1">
-              <span className="text-2xl font-bold text-blue-600">AED {price.toFixed(2)}</span>
+              <span className="text-2xl font-bold text-secondary">AED {price.toFixed(2)}</span>
               {originalPrice && originalPrice > price && (
                 <span className="text-sm text-gray-400 line-through">AED {originalPrice.toFixed(2)}</span>
               )}
@@ -209,7 +198,7 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
                 onClick={handleAddToQuote}
                 disabled={!inStock}
                 aria-label={`Add ${product.name} to quote`}
-                className="flex-1 bg-blue-600 disabled:bg-gray-200 disabled:text-gray-400 text-white py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className="flex-1 bg-secondary disabled:bg-gray-200 disabled:text-gray-400 text-white py-3 rounded-xl font-semibold text-sm hover:bg-gray-800 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
                 <ShoppingCart size={16} />
                 Add to Quote
@@ -231,7 +220,7 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
                 { icon: RefreshCcw, title: 'Easy Returns', sub: '30-day policy' },
               ].map(({ icon: Icon, title, sub }) => (
                 <div key={title} className="text-center">
-                  <Icon size={18} className="mx-auto mb-1 text-blue-600" aria-hidden="true" />
+                  <Icon size={18} className="mx-auto mb-1 text-primary" aria-hidden="true" />
                   <p className="text-[9px] sm:text-[10px] font-semibold text-gray-700 leading-tight">{title}</p>
                   <p className="text-[8px] sm:text-[9px] text-gray-400">{sub}</p>
                 </div>
@@ -240,7 +229,7 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
           </div>
         </div>
 
-        {/* ── Tabs Section ── */}
+        {/* ── Tabs ── */}
         <div className="mt-4 bg-white rounded-xl border border-gray-100 overflow-hidden">
           <div className="flex border-b border-gray-100 overflow-x-auto" role="tablist">
             {['features', 'specifications', 'reviews'].map((tab) => (
@@ -251,7 +240,7 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
                 aria-selected={activeTab === tab}
                 className={`px-4 py-3 text-xs sm:text-sm font-semibold whitespace-nowrap capitalize transition-colors ${
                   activeTab === tab
-                    ? 'border-b-2 border-blue-600 text-blue-600'
+                    ? 'border-b-2 border-primary text-primary'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -266,7 +255,7 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {product.features.map((f: string, i: number) => (
                     <div key={i} className="flex items-start gap-2 p-2.5 bg-gray-50 rounded-lg">
-                      <span className="text-blue-600 mt-0.5 text-xs shrink-0" aria-hidden="true">✓</span>
+                      <span className="text-primary mt-0.5 text-xs shrink-0" aria-hidden="true">✓</span>
                       <span className="text-xs sm:text-sm text-gray-700">{f}</span>
                     </div>
                   ))}
@@ -300,7 +289,7 @@ export default function ProductDetailClient({ slug, initialProduct }: ProductDet
           onClick={handleAddToQuote}
           disabled={!inStock}
           aria-label={`Add ${product.name} to quote`}
-          className="flex-1 bg-blue-600 disabled:bg-gray-200 disabled:text-gray-400 text-white py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5"
+          className="flex-1 bg-secondary disabled:bg-gray-200 disabled:text-gray-400 text-white py-3 rounded-xl font-semibold text-sm hover:bg-gray-800 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5"
         >
           <ShoppingCart size={15} />
           Add to Quote

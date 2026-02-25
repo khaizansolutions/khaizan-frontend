@@ -56,7 +56,6 @@ export default function ProductFilters({
     setMaxPriceInput(priceRange[1])
   }, [priceRange])
 
-  // Lock body scroll when mobile drawer open
   useEffect(() => {
     if (isMobileOpen) {
       document.body.style.overflow = 'hidden'
@@ -115,7 +114,7 @@ export default function ProductFilters({
           <SlidersHorizontal size={16} className="text-gray-500" />
           <span className="font-semibold text-sm text-gray-900">Filters</span>
           {activeFilterCount > 0 && (
-            <span className="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+            <span className="bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
               {activeFilterCount}
             </span>
           )}
@@ -124,7 +123,7 @@ export default function ProductFilters({
           {hasActiveFilters && (
             <button
               onClick={handleClearAll}
-              className="flex items-center gap-1 text-xs text-red-500 hover:text-red-600 font-medium transition-colors"
+              className="flex items-center gap-1 text-xs text-primary hover:text-red-700 font-medium transition-colors"
             >
               <Trash2 size={11} />
               Clear
@@ -153,7 +152,7 @@ export default function ProductFilters({
                   <button
                     key={catId}
                     onClick={() => onCategoryChange(catId)}
-                    className="flex items-center gap-1 bg-blue-50 text-blue-700 border border-blue-200 text-xs font-medium px-2.5 py-1 rounded-full hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
+                    className="flex items-center gap-1 bg-red-50 text-primary border border-red-200 text-xs font-medium px-2.5 py-1 rounded-full hover:bg-red-100 transition-colors"
                   >
                     {cat.name} <X size={10} />
                   </button>
@@ -163,7 +162,7 @@ export default function ProductFilters({
                 <button
                   key={type}
                   onClick={() => onProductTypeChange?.(type)}
-                  className="flex items-center gap-1 bg-blue-50 text-blue-700 border border-blue-200 text-xs font-medium px-2.5 py-1 rounded-full hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
+                  className="flex items-center gap-1 bg-red-50 text-primary border border-red-200 text-xs font-medium px-2.5 py-1 rounded-full hover:bg-red-100 transition-colors"
                 >
                   {TYPE_LABELS[type] || type} <X size={10} />
                 </button>
@@ -171,7 +170,7 @@ export default function ProductFilters({
               {(priceRange[0] > 0 || priceRange[1] < maxPrice) && (
                 <button
                   onClick={() => { setMinPrice(0); setMaxPriceInput(maxPrice); onPriceChange([0, maxPrice]) }}
-                  className="flex items-center gap-1 bg-blue-50 text-blue-700 border border-blue-200 text-xs font-medium px-2.5 py-1 rounded-full hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
+                  className="flex items-center gap-1 bg-red-50 text-primary border border-red-200 text-xs font-medium px-2.5 py-1 rounded-full hover:bg-red-100 transition-colors"
                 >
                   AED {priceRange[0]}–{priceRange[1]} <X size={10} />
                 </button>
@@ -179,7 +178,7 @@ export default function ProductFilters({
               {searchQuery && (
                 <button
                   onClick={() => onSearchChange('')}
-                  className="flex items-center gap-1 bg-blue-50 text-blue-700 border border-blue-200 text-xs font-medium px-2.5 py-1 rounded-full hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
+                  className="flex items-center gap-1 bg-red-50 text-primary border border-red-200 text-xs font-medium px-2.5 py-1 rounded-full hover:bg-red-100 transition-colors"
                 >
                   &ldquo;{searchQuery}&rdquo; <X size={10} />
                 </button>
@@ -197,7 +196,7 @@ export default function ProductFilters({
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
                 placeholder="Name, brand..."
-                className="w-full pl-8 pr-8 py-2 text-sm border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-50 outline-none transition-all bg-gray-50 focus:bg-white"
+                className="w-full pl-8 pr-8 py-2 text-sm border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-red-50 outline-none transition-all bg-gray-50 focus:bg-white"
               />
               {searchQuery && (
                 <button onClick={() => onSearchChange('')} className="absolute right-2.5 top-1/2 -translate-y-1/2" aria-label="Clear search">
@@ -220,13 +219,13 @@ export default function ProductFilters({
                       onClick={() => onProductTypeChange?.(type.value)}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-all ${
                         isSelected
-                          ? 'bg-blue-600 text-white font-medium'
+                          ? 'bg-primary text-white font-medium'
                           : 'text-gray-700 hover:bg-gray-100'
                       }`}
                     >
                       <span>{TYPE_LABELS[type.value] || type.value}</span>
                       {type.count !== undefined && (
-                        <span className={`text-xs ${isSelected ? 'text-blue-200' : 'text-gray-400'}`}>
+                        <span className={`text-xs ${isSelected ? 'text-red-200' : 'text-gray-400'}`}>
                           {type.count}
                         </span>
                       )}
@@ -249,7 +248,7 @@ export default function ProductFilters({
                   value={categorySearch}
                   onChange={(e) => setCategorySearch(e.target.value)}
                   placeholder="Search categories..."
-                  className="w-full pl-7 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:border-blue-400 outline-none bg-gray-50 focus:bg-white transition-all"
+                  className="w-full pl-7 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:border-primary outline-none bg-gray-50 focus:bg-white transition-all"
                 />
               </div>
             )}
@@ -264,7 +263,7 @@ export default function ProductFilters({
                     <label
                       key={category.id}
                       className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-all ${
-                        isSelected ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50 text-gray-700'
+                        isSelected ? 'bg-red-50 text-primary' : 'hover:bg-gray-50 text-gray-700'
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
@@ -272,12 +271,12 @@ export default function ProductFilters({
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => onCategoryChange(category.id.toString())}
-                          className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
+                          className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"
                         />
                         <span className="text-sm">{category.name}</span>
                       </div>
                       {category.count !== undefined && category.count > 0 && (
-                        <span className={`text-xs ${isSelected ? 'text-blue-500' : 'text-gray-400'}`}>
+                        <span className={`text-xs ${isSelected ? 'text-primary' : 'text-gray-400'}`}>
                           {category.count}
                         </span>
                       )}
@@ -290,7 +289,7 @@ export default function ProductFilters({
             {filteredCategories.length > 6 && (
               <button
                 onClick={() => setShowAllCategories(!showAllCategories)}
-                className="mt-2 flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                className="mt-2 flex items-center gap-1 text-xs text-primary hover:text-red-700 font-medium transition-colors"
               >
                 {showAllCategories ? (
                   <><ChevronUp size={12} /> Show less</>
@@ -313,7 +312,7 @@ export default function ProductFilters({
                   value={minPrice}
                   onChange={(e) => setMinPrice(Math.max(0, Number(e.target.value)))}
                   onBlur={handlePriceApply}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-50 outline-none transition-all"
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-red-50 outline-none transition-all"
                   min="0"
                   max={maxPriceInput}
                   placeholder="0"
@@ -326,7 +325,7 @@ export default function ProductFilters({
                   value={maxPriceInput}
                   onChange={(e) => setMaxPriceInput(Math.min(maxPrice, Number(e.target.value)))}
                   onBlur={handlePriceApply}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-50 outline-none transition-all"
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:border-primary focus:ring-2 focus:ring-red-50 outline-none transition-all"
                   min={minPrice}
                   max={maxPrice}
                   placeholder={maxPrice.toString()}
@@ -347,7 +346,7 @@ export default function ProductFilters({
                     key={preset.label}
                     onClick={() => { setMinPrice(preset.value[0]); setMaxPriceInput(preset.value[1]); onPriceChange(preset.value) }}
                     className={`px-2.5 py-1 text-xs font-medium rounded-lg transition-all ${
-                      isActive ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      isActive ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
                     {preset.label}
@@ -367,13 +366,13 @@ export default function ProductFilters({
       {/* ── Mobile FAB ── */}
       <button
         onClick={() => setIsMobileOpen(true)}
-        className="md:hidden fixed bottom-6 right-6 z-40 h-12 px-4 bg-blue-600 text-white rounded-full shadow-lg flex items-center gap-2 text-sm font-semibold hover:bg-blue-700 active:scale-95 transition-all"
+        className="md:hidden fixed bottom-6 right-6 z-40 h-12 px-4 bg-secondary text-white rounded-full shadow-lg flex items-center gap-2 text-sm font-semibold hover:bg-gray-800 active:scale-95 transition-all"
         aria-label="Open filters"
       >
         <SlidersHorizontal size={15} />
         Filters
         {activeFilterCount > 0 && (
-          <span className="bg-white text-blue-600 text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+          <span className="bg-primary text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
             {activeFilterCount}
           </span>
         )}

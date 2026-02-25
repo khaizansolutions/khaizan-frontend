@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { ShoppingCart, MessageCircle, Plus, Minus, Package } from 'lucide-react'
 import { useQuote } from '@/context/QuoteContext'
 
@@ -44,17 +43,31 @@ export default function ProductCard({ product }: { product: any }) {
   return (
     <div className="group bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full">
 
-      {/* ── Image (fixed height) ── */}
+      {/* ── Image ── */}
       <Link href={productUrl} className="block flex-shrink-0">
-        <div className="relative w-full h-32 sm:h-36 bg-gray-50 overflow-hidden">
+        <div className="relative w-full h-32 sm:h-36 bg-gray-50 overflow-hidden flex items-center justify-center">
           {imageUrl ? (
-            // ✅ SEO FIX: Next.js Image — auto WebP, lazy load, size optimization
-            <Image
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
               src={imageUrl}
               alt={product.name}
-              fill
-              sizes="(max-width: 640px) 45vw, (max-width: 768px) 30vw, 23vw"
-              className="object-contain p-2 group-hover:scale-[1.03] transition-transform duration-300"
+              className="w-full h-full object-contain p-2 group-hover:scale-[1.03] transition-transform duration-300"
+              loading="lazy"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement
+                target.style.display = 'none'
+                const parent = target.parentElement
+                if (parent) {
+                  parent.innerHTML = `
+                    <div class="w-full h-full flex flex-col items-center justify-center gap-1 bg-gray-50">
+                      <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                      </svg>
+                      <span class="text-[8px] text-gray-300">No Image</span>
+                    </div>
+                  `
+                }
+              }}
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center gap-1 bg-gray-50">
@@ -66,13 +79,13 @@ export default function ProductCard({ product }: { product: any }) {
           {/* Badges — top left */}
           <div className="absolute top-1 left-1 flex flex-col gap-0.5">
             {categoryName && (
-              <span className="bg-orange-500 text-white text-[7px] font-bold px-1.5 py-0.5 rounded-full leading-tight max-w-[72px] truncate">
+              <span className="bg-primary text-white text-[7px] font-bold px-1.5 py-0.5 rounded-full leading-tight max-w-[72px] truncate">
                 {categoryName}
               </span>
             )}
             {product.product_type && product.product_type !== 'new' && (
               <span className={`text-white text-[7px] font-bold px-1.5 py-0.5 rounded-full leading-tight ${
-                product.product_type === 'rental' ? 'bg-blue-500' : 'bg-purple-500'
+                product.product_type === 'rental' ? 'bg-secondary' : 'bg-gray-600'
               }`}>
                 {product.product_type === 'rental' ? 'Rental' : 'Refurb'}
               </span>
@@ -81,14 +94,14 @@ export default function ProductCard({ product }: { product: any }) {
 
           {/* Discount — top right */}
           {discountPercent > 0 && (
-            <span className="absolute top-1 right-1 bg-red-500 text-white text-[7px] font-bold px-1.5 py-0.5 rounded-full">
+            <span className="absolute top-1 right-1 bg-primary text-white text-[7px] font-bold px-1.5 py-0.5 rounded-full">
               -{discountPercent}%
             </span>
           )}
 
           {!product.in_stock && (
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-              <span className="bg-red-500 text-white text-[9px] font-semibold px-2 py-1 rounded-md">
+              <span className="bg-primary text-white text-[9px] font-semibold px-2 py-1 rounded-md">
                 Out of Stock
               </span>
             </div>
@@ -96,23 +109,19 @@ export default function ProductCard({ product }: { product: any }) {
         </div>
       </Link>
 
-      {/* ── Info (flex-1 so all cards stretch equally) ── */}
+      {/* ── Info ── */}
       <div className="flex flex-col flex-1 px-2 pt-1.5 pb-2">
-
         <Link href={productUrl} className="block">
           {product.brand && (
             <p className="text-[7px] font-semibold text-gray-400 uppercase tracking-wider truncate">
               {product.brand}
             </p>
           )}
-
-          {/* Fixed 2-line height for name so all cards align */}
           <h3 className="text-[10px] font-semibold text-gray-800 leading-snug line-clamp-2 h-[2.4em] mt-0.5">
             {product.name}
           </h3>
-
           <div className="flex items-baseline gap-1 mt-1">
-            <span className="text-xs font-bold text-blue-600">
+            <span className="text-xs font-bold text-secondary">
               AED {price.toFixed(0)}
             </span>
             {originalPrice && originalPrice > price && (
@@ -123,32 +132,30 @@ export default function ProductCard({ product }: { product: any }) {
           </div>
         </Link>
 
-        {/* Spacer pushes buttons to bottom */}
         <div className="flex-1" />
 
-        {/* ── Buttons always at bottom ── */}
+        {/* ── Buttons ── */}
         <div className="flex gap-1 mt-1.5">
           {quantity === 0 ? (
             <button
               onClick={handleAddToQuote}
               disabled={!product.in_stock}
-              className="flex-1 bg-blue-600 disabled:bg-gray-100 disabled:text-gray-400 text-white py-1.5 rounded-lg hover:bg-blue-700 active:scale-[0.97] transition-all flex items-center justify-center gap-1 text-[10px] font-semibold"
+              className="flex-1 bg-secondary disabled:bg-gray-100 disabled:text-gray-400 text-white py-1.5 rounded-lg hover:bg-gray-800 active:scale-[0.97] transition-all flex items-center justify-center gap-1 text-[10px] font-semibold"
             >
               <ShoppingCart size={11} />
               <span>Quote</span>
             </button>
           ) : (
-            <div className="flex-1 flex items-center justify-between bg-blue-600 text-white rounded-lg overflow-hidden">
-              <button onClick={(e) => handleQuantityChange(e, 'remove')} className="px-2 py-1.5 hover:bg-blue-700 transition-colors" aria-label="Remove from quote">
+            <div className="flex-1 flex items-center justify-between bg-secondary text-white rounded-lg overflow-hidden">
+              <button onClick={(e) => handleQuantityChange(e, 'remove')} className="px-2 py-1.5 hover:bg-gray-800 transition-colors" aria-label="Remove from quote">
                 <Minus size={11} />
               </button>
               <span className="font-bold text-[10px] tabular-nums">{quantity}</span>
-              <button onClick={(e) => handleQuantityChange(e, 'add')} className="px-2 py-1.5 hover:bg-blue-700 transition-colors" aria-label="Add to quote">
+              <button onClick={(e) => handleQuantityChange(e, 'add')} className="px-2 py-1.5 hover:bg-gray-800 transition-colors" aria-label="Add to quote">
                 <Plus size={11} />
               </button>
             </div>
           )}
-          {/* ✅ SEO FIX: aria-label added to icon-only button */}
           <button
             onClick={handleWhatsApp}
             className="bg-green-500 text-white px-2 py-1.5 rounded-lg hover:bg-green-600 active:scale-[0.97] transition-all flex items-center justify-center"

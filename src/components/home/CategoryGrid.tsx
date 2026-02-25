@@ -17,19 +17,10 @@ interface Category {
   subcategories: Subcategory[]
 }
 
-const COLORS = [
-  { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-100 hover:border-blue-300' },
-  { bg: 'bg-green-50', text: 'text-green-600', border: 'border-green-100 hover:border-green-300' },
-  { bg: 'bg-purple-50', text: 'text-purple-600', border: 'border-purple-100 hover:border-purple-300' },
-  { bg: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-100 hover:border-orange-300' },
-]
-
 interface CategoryGridProps {
   initialCategories?: Category[]
 }
 
-// ✅ PERF FIX: No more useEffect/fetch — data comes from server via props
-// Instant render, no loading spinner, better SEO (content in HTML)
 export default function CategoryGrid({ initialCategories = [] }: CategoryGridProps) {
   const displayCategories = initialCategories.slice(0, 4)
 
@@ -51,34 +42,31 @@ export default function CategoryGrid({ initialCategories = [] }: CategoryGridPro
       <h2 className="text-base font-bold text-gray-800 mb-3">Shop by Category</h2>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
-        {displayCategories.map((category, index) => {
-          const color = COLORS[index % COLORS.length]
-          return (
-            <Link
-              key={category.id}
-              href={`/products?category=${category.slug}`}
-              className={`group ${color.bg} border ${color.border} rounded-xl p-3 hover:shadow-sm transition-all duration-200`}
-            >
-              <h3 className="font-semibold text-xs sm:text-sm text-gray-800 line-clamp-1 mb-0.5">
-                {category.name}
-              </h3>
-              {category.subcategories?.length > 0 && (
-                <p className="text-[9px] text-gray-400 mb-1.5">
-                  {category.subcategories.length} subcategories
-                </p>
-              )}
-              <div className={`flex items-center gap-0.5 text-[9px] font-semibold ${color.text}`}>
-                Browse <ArrowRight size={9} className="group-hover:translate-x-0.5 transition-transform" />
-              </div>
-            </Link>
-          )
-        })}
+        {displayCategories.map((category) => (
+          <Link
+            key={category.id}
+            href={`/products?category=${category.slug}`}
+            className="group bg-gray-50 border border-gray-100 hover:border-primary rounded-xl p-3 hover:shadow-sm transition-all duration-200"
+          >
+            <h3 className="font-semibold text-xs sm:text-sm text-gray-800 line-clamp-1 mb-0.5">
+              {category.name}
+            </h3>
+            {category.subcategories?.length > 0 && (
+              <p className="text-[9px] text-gray-400 mb-1.5">
+                {category.subcategories.length} subcategories
+              </p>
+            )}
+            <div className="flex items-center gap-0.5 text-[9px] font-semibold text-primary">
+              Browse <ArrowRight size={9} className="group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </Link>
+        ))}
       </div>
 
       {initialCategories.length > 4 && (
         <Link
           href="/products"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-600 hover:text-gray-900 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-600 hover:text-primary transition-colors"
         >
           <Grid3X3 size={13} />
           View all {initialCategories.length} categories

@@ -15,9 +15,10 @@ interface Product {
   main_image: string
   image?: string
   category_name: string
-  category: string
-  category_id: number
-  subcategory_id?: number
+  category?: string
+  category_id?: number | string
+  subcategory_id?: number | string
+  subcategory_name?: string
   product_type: 'new' | 'refurbished' | 'rental'
   product_type_display: string
   is_featured: boolean
@@ -32,6 +33,7 @@ interface Category {
   name: string
   slug?: string
   product_count: number
+  subcategories?: Array<{ id: number; name: string; slug: string; category_name?: string }>
 }
 
 interface ProductsPageContentProps {
@@ -40,7 +42,31 @@ interface ProductsPageContentProps {
   totalCount: number
   initialProductType?: string | null
   initialCategory?: string | null
+  initialSubcategory?: string | null
   initialSearch?: string | null
+}
+
+function resolveInitialCategoryNames(
+  initialCategory: string | null | undefined,
+  initialSubcategory: string | null | undefined,
+  initialCategories: Category[],
+): string[] {
+  if (!initialCategories?.length) return []
+  if (initialSubcategory) {
+    for (const cat of initialCategories) {
+      const found = cat.subcategories?.find(sub => sub.slug === initialSubcategory)
+      if (found) return [cat.name]
+    }
+  }
+  if (initialCategory) {
+    const bySlug = initialCategories.find(c => c.slug === initialCategory)
+    if (bySlug) return [bySlug.name]
+    const byName = initialCategories.find(
+      c => c.name.toLowerCase().replace(/\s+/g, '-') === initialCategory.toLowerCase()
+    )
+    if (byName) return [byName.name]
+  }
+  return []
 }
 
 export default function ProductsPageContent({
@@ -49,10 +75,13 @@ export default function ProductsPageContent({
   totalCount,
   initialProductType,
   initialCategory,
+  initialSubcategory,
   initialSearch,
 }: ProductsPageContentProps) {
 
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(() =>
+    resolveInitialCategoryNames(initialCategory, initialSubcategory, initialCategories)
+  )
   const [selectedProductTypes, setSelectedProductTypes] = useState<string[]>(
     initialProductType ? [initialProductType] : []
   )
@@ -60,40 +89,19 @@ export default function ProductsPageContent({
   const [searchQuery, setSearchQuery] = useState(initialSearch || '')
 
   useEffect(() => {
-    if (!initialCategory || !initialCategories.length) return
+    setSelectedCategories(resolveInitialCategoryNames(initialCategory, initialSubcategory, initialCategories))
+  }, [initialCategory, initialSubcategory, initialCategories.length])
 
-    const bySlug = initialCategories.find((c) => c.slug === initialCategory)
-    if (bySlug) { setSelectedCategories([bySlug.id.toString()]); return }
-
-    const byName = initialCategories.find(
-      (c) => c.name.toLowerCase().replace(/\s+/g, '-') === initialCategory.toLowerCase()
-    )
-    if (byName) { setSelectedCategories([byName.id.toString()]); return }
-
-    const matchingProduct = initialProducts.find(
-      (p) => (p.category || '').toLowerCase().replace(/\s+/g, '-') === initialCategory.toLowerCase()
-    )
-    if (matchingProduct?.category_id) {
-      setSelectedCategories([matchingProduct.category_id.toString()])
-    }
-  }, [initialCategory, initialCategories, initialProducts])
-
-  // ✅ DEBUG: Remove after fixing
   useEffect(() => {
-    console.log('=== FILTER DEBUG ===')
-    console.log('initialCategory:', initialCategory)
-    console.log('initialCategories:', JSON.stringify(initialCategories.slice(0, 3)))
-    console.log('selectedCategories:', selectedCategories)
-    console.log('product sample:', JSON.stringify(initialProducts.slice(0, 2).map(p => ({
-      id: p.id,
-      category_id: p.category_id,
-      category: p.category,
-      category_name: p.category_name
-    }))))
-  }, [selectedCategories])
+    setSelectedProductTypes(initialProductType ? [initialProductType] : [])
+  }, [initialProductType])
+
+  useEffect(() => {
+    setSearchQuery(initialSearch || '')
+  }, [initialSearch])
 
   const maxPrice = useMemo(() => {
-    const prices = initialProducts.map((p) => parseFloat(p.price))
+    const prices = initialProducts.map(p => parseFloat(p.price)).filter(n => !isNaN(n))
     return Math.ceil(Math.max(...prices, 10000))
   }, [initialProducts])
 
@@ -102,35 +110,49 @@ export default function ProductsPageContent({
   }, [maxPrice])
 
   const productTypes = useMemo(() => [
-    { value: 'new', label: 'New', count: initialProducts.filter((p) => p.product_type === 'new').length },
-    { value: 'refurbished', label: 'Refurbished', count: initialProducts.filter((p) => p.product_type === 'refurbished').length },
-    { value: 'rental', label: 'Rental', count: initialProducts.filter((p) => p.product_type === 'rental').length },
+    { value: 'new', label: 'New', count: initialProducts.filter(p => p.product_type === 'new').length },
+    { value: 'refurbished', label: 'Refurbished', count: initialProducts.filter(p => p.product_type === 'refurbished').length },
+    { value: 'rental', label: 'Rental', count: initialProducts.filter(p => p.product_type === 'rental').length },
   ], [initialProducts])
 
   const filteredProducts = useMemo(() => {
-    return initialProducts.filter((product) => {
-      if (selectedCategories.length > 0 && !selectedCategories.includes(product.category_id?.toString())) return false
+    return initialProducts.filter(product => {
+      if (selectedCategories.length > 0) {
+        const productCatName = (product.category_name || product.category || '').toLowerCase()
+        if (!selectedCategories.some(sel => sel.toLowerCase() === productCatName)) return false
+      }
       if (selectedProductTypes.length > 0 && !selectedProductTypes.includes(product.product_type)) return false
       const price = parseFloat(product.price)
-      if (price < priceRange[0] || price > priceRange[1]) return false
+      if (!isNaN(price) && (price < priceRange[0] || price > priceRange[1])) return false
       if (searchQuery) {
         const query = searchQuery.toLowerCase()
-        const searchableText = `${product.name} ${product.brand} ${product.category_name || product.category}`.toLowerCase()
-        if (!searchableText.includes(query)) return false
+        const text = `${product.name} ${product.brand || ''} ${product.category_name || ''}`.toLowerCase()
+        if (!text.includes(query)) return false
       }
       return true
     })
   }, [initialProducts, selectedCategories, selectedProductTypes, priceRange, searchQuery])
 
-  const handleCategoryChange = (categoryId: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(categoryId) ? prev.filter((id) => id !== categoryId) : [...prev, categoryId]
+  const categoriesForFilter = useMemo(() =>
+    initialCategories.map(cat => ({
+      id: cat.name,
+      name: cat.name,
+      count: initialProducts.filter(
+        p => (p.category_name || p.category || '').toLowerCase() === cat.name.toLowerCase()
+      ).length,
+    })),
+    [initialCategories, initialProducts]
+  )
+
+  const handleCategoryChange = (categoryName: string) => {
+    setSelectedCategories(prev =>
+      prev.includes(categoryName) ? prev.filter(n => n !== categoryName) : [...prev, categoryName]
     )
   }
 
   const handleProductTypeChange = (type: string) => {
-    setSelectedProductTypes((prev) =>
-      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+    setSelectedProductTypes(prev =>
+      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
     )
   }
 
@@ -141,26 +163,27 @@ export default function ProductsPageContent({
     setSearchQuery('')
   }
 
+  const activeFilterLabel = useMemo(() => {
+    if (initialSubcategory) return initialSubcategory.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+    if (initialCategory) return initialCategory.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+    if (initialProductType) return initialProductType.charAt(0).toUpperCase() + initialProductType.slice(1) + ' Products'
+    return null
+  }, [initialCategory, initialSubcategory, initialProductType])
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-3 sm:px-4 py-5 sm:py-6">
-        <div className="mb-5">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Our Products</h1>
-          <p className="text-sm text-gray-500">
-            Showing{' '}
-            <span className="font-semibold text-blue-600">{filteredProducts.length}</span>
-            {' '}of{' '}
-            <span className="font-semibold text-gray-700">{totalCount}</span> products
-          </p>
+
+        {/* ── Header ── */}
+        <div className="mb-4">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+            {activeFilterLabel ?? 'Our Products'}
+          </h1>
         </div>
 
         <div className="flex gap-4 sm:gap-6">
           <ProductFilters
-            categories={initialCategories.map((cat) => ({
-              id: cat.id,
-              name: cat.name,
-              count: initialProducts.filter((p) => p.category_id === cat.id).length,
-            }))}
+            categories={categoriesForFilter}
             selectedCategories={selectedCategories}
             priceRange={priceRange}
             maxPrice={maxPrice}
@@ -188,14 +211,15 @@ export default function ProductsPageContent({
                 <p className="text-sm text-gray-500 mb-6">Try adjusting your filters or search.</p>
                 <button
                   onClick={handleClearFilters}
-                  className="px-6 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
+                  className="px-6 py-2.5 bg-secondary text-white rounded-xl text-sm font-semibold hover:bg-gray-800 transition-colors"
                 >
                   Clear Filters
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3 lg:gap-4">
-                {filteredProducts.map((product) => (
+              // ✅ 3 cols mobile, 4 cols tablet, 5 cols desktop — compact professional grid
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
+                {filteredProducts.map(product => (
                   <ProductCard key={`product-${product.id}-${product.slug}`} product={product} />
                 ))}
               </div>

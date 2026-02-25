@@ -49,6 +49,11 @@ export const metadata: Metadata = {
     'Khaizan Solutions',
     'office supplies UAE',
   ],
+  icons: {
+    icon: [{ url: '/KHAIZAN-SOLUTION.png', type: 'image/png' }],
+    shortcut: '/KHAIZAN-SOLUTION.png',
+    apple: '/KHAIZAN-SOLUTION.png',
+  },
   verification: {
     google: 'aBk4_ofvvAy13uytHfSFycsm8S2slCnYk33hSdhHTXs',
   },
@@ -94,11 +99,12 @@ export default async function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="icon" href="/KHAIZAN-SOLUTION.png" type="image/png" />
+        <link rel="shortcut icon" href="/KHAIZAN-SOLUTION.png" />
+        <link rel="apple-touch-icon" href="/KHAIZAN-SOLUTION.png" />
       </head>
       <body className={inter.className}>
-        {/* ✅ Google Analytics GA4 — lazyOnload, never blocks render */}
         <GoogleAnalytics />
-        {/* ✅ Schema Markup — LocalBusiness + WebSite + Organization */}
         <SchemaMarkup />
         <QuoteProvider>
           <WakeBackend />

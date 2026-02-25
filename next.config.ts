@@ -2,6 +2,10 @@
 
 const nextConfig: NextConfig = {
   images: {
+    // ✅ Increase timeout for slow Render/Cloudinary responses
+    minimumCacheTTL: 60,
+    // ✅ Allow Cloudinary's auto format (no extension in URL)
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
         protocol: 'https',
@@ -11,15 +15,15 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'images.unsplash.com',
       },
-      // ✅ SEO FIX: Added Cloudinary (product images)
       {
         protocol: 'https',
         hostname: 'res.cloudinary.com',
+        pathname: '/**',
       },
-      // ✅ SEO FIX: Added Render backend (fallback images)
       {
         protocol: 'https',
         hostname: 'khaizan-backend.onrender.com',
+        pathname: '/**',
       },
     ],
   },
