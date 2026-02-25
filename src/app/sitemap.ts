@@ -5,28 +5,20 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://khaizan-backend.onre
 
 async function getProducts() {
   try {
-    const res = await fetch(`${API_URL}/products/?page_size=1000`, {
-      next: { revalidate: 3600 },
-    })
+    const res = await fetch(`${API_URL}/products/?page_size=1000`, { next: { revalidate: 3600 } })
     if (!res.ok) return []
     const data = await res.json()
     return data.results || data || []
-  } catch {
-    return []
-  }
+  } catch { return [] }
 }
 
 async function getCategories() {
   try {
-    const res = await fetch(`${API_URL}/categories/`, {
-      next: { revalidate: 3600 },
-    })
+    const res = await fetch(`${API_URL}/categories/`, { next: { revalidate: 3600 } })
     if (!res.ok) return []
     const data = await res.json()
     return data.results || data || []
-  } catch {
-    return []
-  }
+  } catch { return [] }
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -35,6 +27,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     { url: BASE_URL, lastModified: new Date(), changeFrequency: 'daily', priority: 1.0 },
     { url: `${BASE_URL}/products`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
+    // ✅ Dedicated clean URL pages — Google ranks these much better than ?query strings
+    { url: `${BASE_URL}/rental`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${BASE_URL}/refurbished`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
     { url: `${BASE_URL}/products?product_type=new`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
     { url: `${BASE_URL}/products?product_type=refurbished`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${BASE_URL}/products?product_type=rental`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
