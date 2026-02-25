@@ -50,8 +50,11 @@ export const metadata: Metadata = {
     'office supplies UAE',
   ],
   icons: {
-    icon: [{ url: '/KHAIZAN-SOLUTION.png', type: 'image/png' }],
-    shortcut: '/KHAIZAN-SOLUTION.png',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/KHAIZAN-SOLUTION.png', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico',
     apple: '/KHAIZAN-SOLUTION.png',
   },
   verification: {
@@ -99,8 +102,10 @@ export default async function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* ✅ favicon.ico — universally supported by all browsers */}
+        <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" href="/KHAIZAN-SOLUTION.png" type="image/png" />
-        <link rel="shortcut icon" href="/KHAIZAN-SOLUTION.png" />
+        <link rel="shortcut icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/KHAIZAN-SOLUTION.png" />
       </head>
       <body className={inter.className}>
